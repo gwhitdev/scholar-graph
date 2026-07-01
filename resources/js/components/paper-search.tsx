@@ -88,6 +88,7 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     return;
                 }
+
                 setResults([]);
                 setHasSearched(true);
             } finally {

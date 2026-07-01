@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import { UserIcon, BotIcon } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { SourcesBadge } from '@/components/sources-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
