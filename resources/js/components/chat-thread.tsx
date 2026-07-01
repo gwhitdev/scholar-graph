@@ -1,6 +1,12 @@
+import { useEffect, useRef } from 'react';
 import { UserIcon, BotIcon } from 'lucide-react';
 import { SourcesBadge } from '@/components/sources-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+interface Paper {
+    id: number;
+    title: string;
+}
 
 interface ChatMessage {
     id: number;
@@ -13,15 +19,27 @@ interface ChatMessage {
 
 interface ChatThreadProps {
     messages: ChatMessage[];
+    papers: Paper[];
 }
 
-export function ChatThread({ messages }: ChatThreadProps) {
+export function ChatThread({ messages, papers }: ChatThreadProps) {
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages]);
+
     return (
         <Card className="flex flex-1 flex-col">
             <CardHeader>
                 <CardTitle>Discussion</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-1 flex-col gap-4 overflow-y-auto">
+            <CardContent
+                ref={scrollRef}
+                className="flex flex-1 flex-col gap-4 overflow-y-auto"
+            >
                 {messages.length === 0 && (
                     <p className="text-sm text-muted-foreground">
                         Ask a question about your papers to get started.
@@ -66,10 +84,10 @@ export function ChatThread({ messages }: ChatThreadProps) {
                                 </div>
                                 {!isUser && message.synthesis && (
                                     <SourcesBadge
-                                        count={
+                                        paperIds={
                                             message.synthesis.paper_ids
-                                                ?.length ?? 0
                                         }
+                                        papers={papers}
                                     />
                                 )}
                             </div>

@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { SendIcon } from 'lucide-react';
+import { Loader2Icon, SendIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { store } from '@/actions/App/Http/Controllers/ChatController';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,11 @@ export function ChatInput({ projectId }: ChatInputProps) {
                     onClick={submit}
                     aria-label="Send message"
                 >
-                    <SendIcon className="size-4" />
+                    {processing ? (
+                        <Loader2Icon className="size-4 animate-spin" />
+                    ) : (
+                        <SendIcon className="size-4" />
+                    )}
                 </Button>
             </div>
             {errors.question && (

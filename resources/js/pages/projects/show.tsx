@@ -76,7 +76,7 @@ export default function ProjectsShow({ project, papers, chatMessages }: Props) {
                     </div>
 
                     <div className="flex min-h-0 flex-col gap-4">
-                        <ChatThread messages={chatMessages} />
+                        <ChatThread messages={chatMessages} papers={papers} />
                         <ChatInput projectId={project.id} />
                     </div>
                 </div>
