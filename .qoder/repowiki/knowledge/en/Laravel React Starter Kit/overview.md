@@ -1,0 +1,1 @@
+Orchestrates a full-stack Laravel and React application using Inertia.js, unified by Vite for asset bundling and shared development workflows.

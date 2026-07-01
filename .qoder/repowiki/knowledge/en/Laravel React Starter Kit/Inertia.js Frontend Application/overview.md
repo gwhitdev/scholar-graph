@@ -1,0 +1,1 @@
+Provides the client-side React application for a Laravel backend using Inertia.js, featuring authentication flows, user settings, and a responsive UI with dark mode support.

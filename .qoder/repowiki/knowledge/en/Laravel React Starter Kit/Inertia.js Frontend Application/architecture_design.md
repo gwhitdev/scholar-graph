@@ -1,0 +1,5 @@
+- Entry point: `resources/js/app.tsx` bootstraps the Inertia app, defining layout resolution logic (Auth, App, Settings) and global providers (Tooltips, Toasts).
+- Routing: Type-safe route helpers are generated in `resources/js/routes/` and `resources/js/actions/`, mirroring Laravel controller structures (Fortify, Passkeys) to ensure frontend-backend contract consistency.
+- Layouts: Hierarchical layout composition in `resources/js/layouts/` separates authentication, application shell (sidebar/header), and settings contexts.
+- Components: A `ui/` subdirectory contains atomic, headless UI primitives (Radix UI-based) while higher-order components in the parent directory compose these into domain-specific features (e.g., `manage-two-factor.tsx`).
+- State & Hooks: Custom hooks in `resources/js/hooks/` manage cross-cutting concerns like theme persistence (`use-appearance`), mobile navigation, and clipboard interactions.

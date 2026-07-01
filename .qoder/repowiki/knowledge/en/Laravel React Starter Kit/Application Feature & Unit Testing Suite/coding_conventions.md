@@ -1,0 +1,4 @@
+- Uses Pest's `test()` function for defining test cases instead of traditional PHPUnit class methods.
+- Applies `actingAs($user)` to simulate authenticated user sessions in feature tests.
+- Utilizes `User::factory()->create()` to generate test data for database-dependent scenarios.
+- Asserts HTTP responses using chainable methods like `assertOk()`, `assertRedirect()`, and `assertSessionHasNoErrors()`.

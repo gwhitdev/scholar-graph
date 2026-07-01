@@ -1,0 +1,4 @@
+- The root module acts as the monorepo entry point, wiring the backend (Laravel) and frontend (React/Inertia) through shared configuration files (`composer.json`, `package.json`, `vite.config.ts`).
+- Vite serves as the central build tool, integrating Laravel's backend via `laravel-vite-plugin` and the frontend via `@inertiajs/vite`, ensuring synchronized hot-module replacement and asset compilation.
+- Shared development commands in `composer.json` (e.g., `dev`, `test`, `lint`) coordinate cross-module tasks, invoking both PHP and Node.js tools to maintain consistency across the stack.
+- Isolation is maintained by separating backend logic into `app/` and frontend components into `resources/js/`, with Inertia.js acting as the bridge for page rendering and data passing.

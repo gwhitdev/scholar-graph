@@ -1,0 +1,1 @@
+Validates application behavior including authentication, user settings, and dashboard access using Pest PHP and Laravel's testing utilities.

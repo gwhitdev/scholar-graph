@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: frontend_style
+title: Tailwind CSS v4 and shadcn/ui Design System
+scope: []
+source_files:
+    - resources/css/app.css
+    - components.json
+    - resources/js/lib/utils.ts
+    - resources/js/components/ui/button.tsx
+    - resources/js/hooks/use-appearance.tsx
+    - package.json
+depends_on: []
+related_to: []

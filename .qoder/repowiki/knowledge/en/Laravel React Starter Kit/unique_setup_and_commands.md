@@ -1,0 +1,1 @@
+The `composer setup` script orchestrates the initial environment configuration by installing PHP and Node dependencies, generating application keys, and running database migrations in a single command.

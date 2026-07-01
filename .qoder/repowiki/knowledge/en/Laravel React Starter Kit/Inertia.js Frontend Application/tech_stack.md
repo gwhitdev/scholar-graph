@@ -1,0 +1,1 @@
+React with TypeScript, Inertia.js for server-driven SPA behavior, Radix UI for accessible primitives, Tailwind CSS for styling, and Laravel Wayfinder for type-safe routing.

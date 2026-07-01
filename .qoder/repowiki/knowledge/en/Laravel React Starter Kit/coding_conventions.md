@@ -1,0 +1,2 @@
+- Cross-module linting and formatting are standardized via Prettier and ESLint for frontend, and Pint for backend, invoked through root-level Composer scripts.
+- Type checking is enforced across both stacks using TypeScript for the frontend and PHPStan for the backend, integrated into the `ci:check` workflow.

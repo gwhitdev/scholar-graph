@@ -1,0 +1,1 @@
+Handles user registration, authentication, and profile management using Laravel Fortify and Inertia.js.

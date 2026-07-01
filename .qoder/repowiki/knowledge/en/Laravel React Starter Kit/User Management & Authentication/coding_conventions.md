@@ -1,0 +1,3 @@
+- Validation rules are extracted into reusable traits (e.g., `PasswordValidationRules`) and consumed by both Form Requests and Fortify Actions to ensure consistency.
+- Controllers use explicit Form Request classes for input validation rather than inline validator calls.
+- Inertia responses are rendered using `Inertia::render()` with props passed as associative arrays, often including feature flags or computed states.

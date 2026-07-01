@@ -1,0 +1,1 @@
+Pest PHP for test syntax and execution, Laravel Fortify for authentication feature toggles.

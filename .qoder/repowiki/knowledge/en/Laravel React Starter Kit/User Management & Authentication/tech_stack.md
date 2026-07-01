@@ -1,0 +1,1 @@
+Laravel 11+ with Laravel Fortify for authentication scaffolding, Inertia.js for server-driven SPA architecture, and SQLite for local development storage.

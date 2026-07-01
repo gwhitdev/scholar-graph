@@ -1,0 +1,18 @@
+schema_version: 1
+module_path: configuration_system
+title: Laravel Configuration System with Environment Variable Layering
+scope: []
+source_files:
+    - .env.example
+    - bootstrap/app.php
+    - bootstrap/providers.php
+    - config/app.php
+    - config/database.php
+    - config/fortify.php
+    - config/inertia.php
+    - config/session.php
+    - config/cache.php
+    - app/Providers/AppServiceProvider.php
+    - vite.config.ts
+depends_on: []
+related_to: []

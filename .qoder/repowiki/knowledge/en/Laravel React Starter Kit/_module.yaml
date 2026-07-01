@@ -1,0 +1,39 @@
+schema_version: 1
+module_path: ""
+title: Laravel React Starter Kit
+scope:
+    - .editorconfig
+    - .gitattributes
+    - .gitignore
+    - .mcp.json
+    - .npmrc
+    - .prettierignore
+    - .prettierrc
+    - AGENTS.md
+    - CLAUDE.md
+    - boost.json
+    - components.json
+    - composer.json
+    - composer.lock
+    - eslint.config.js
+    - opencode.json
+    - package-lock.json
+    - package.json
+    - phpstan.neon
+    - phpunit.xml
+    - pint.json
+    - pnpm-workspace.yaml
+    - tsconfig.json
+    - vite.config.ts
+    - public/
+    - storage/
+    - hackathon/
+    - .agents/
+    - .claude/
+    - .github/
+    - .env
+    - .env.example
+    - artisan
+source_files: []
+depends_on: []
+related_to: []

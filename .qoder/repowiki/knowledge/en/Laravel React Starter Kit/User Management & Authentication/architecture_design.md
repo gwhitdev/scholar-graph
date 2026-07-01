@@ -1,0 +1,5 @@
+- **Entry Points**: `routes/web.php` and `routes/settings.php` define public and protected routes, leveraging `Route::inertia` for SPA-like page rendering.
+- **Controllers**: `ProfileController` and `SecurityController` manage user settings, delegating validation to dedicated Form Requests (`ProfileUpdateRequest`, `PasswordUpdateRequest`).
+- **Authentication Logic**: Laravel Fortify is configured via `config/fortify.php` and `App\Providers\FortifyServiceProvider`. Custom actions like `CreateNewUser` implement Fortify contracts, using shared validation traits (`PasswordValidationRules`, `ProfileValidationRules`).
+- **Middleware**: `HandleInertiaRequests` injects shared data (user auth state, app config) into every Inertia response. `HandleAppearance` manages UI theme preferences.
+- **Data Layer**: Eloquent `User` model interacts with SQLite via migrations in `database/migrations/`, including support for 2FA and passkeys.

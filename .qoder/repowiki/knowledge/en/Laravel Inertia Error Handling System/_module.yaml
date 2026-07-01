@@ -1,0 +1,16 @@
+schema_version: 1
+module_path: error_handling
+title: Laravel Inertia Error Handling System
+scope: []
+source_files:
+    - bootstrap/app.php
+    - .agents/skills/laravel-best-practices/rules/error-handling.md
+    - resources/js/components/input-error.tsx
+    - resources/js/components/alert-error.tsx
+    - resources/js/hooks/use-flash-toast.ts
+    - resources/js/components/ui/sonner.tsx
+    - resources/js/types/ui.ts
+    - app/Http/Middleware/HandleInertiaRequests.php
+    - app/Http/Controllers/Settings/ProfileController.php
+depends_on: []
+related_to: []

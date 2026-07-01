@@ -1,0 +1,15 @@
+schema_version: 1
+module_path: dependency_management
+title: Dual Package Manager Dependency Management with Composer and npm
+scope: []
+source_files:
+    - composer.json
+    - composer.lock
+    - package.json
+    - package-lock.json
+    - .npmrc
+    - .github/dependabot.yml
+    - .gitignore
+    - pnpm-workspace.yaml
+depends_on: []
+related_to: []

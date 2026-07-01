@@ -1,0 +1,1 @@
+All modules share a unified build pipeline using Vite, with TypeScript for frontend type safety and PHPStan for backend static analysis, enforced via root-level CI scripts.

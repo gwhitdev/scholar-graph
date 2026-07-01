@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: build_system
+title: Dual Ecosystem Build System with Vite and Composer Scripts
+scope: []
+source_files:
+    - composer.json
+    - package.json
+    - vite.config.ts
+    - tsconfig.json
+    - phpunit.xml
+    - .github/workflows/tests.yml
+    - .github/workflows/lint.yml
+depends_on: []
+related_to: []

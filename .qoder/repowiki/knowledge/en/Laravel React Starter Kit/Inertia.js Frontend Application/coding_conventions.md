@@ -1,0 +1,4 @@
+- UI components use the `cva` (class-variance-authority) pattern for managing variant-based styling (e.g., button variants and sizes) combined with `cn` utility for class merging.
+- Page components define static `layout` properties containing metadata like `title` and `description` for consistent head management and layout configuration.
+- Form submissions utilize the Inertia `<Form>` component with render props to access `processing` and `errors` state, ensuring consistent loading and validation feedback.
+- Route interactions use generated helper functions (e.g., `login()`, `store.form()`) from the `routes/` and `actions/` directories instead of hardcoded URLs.
