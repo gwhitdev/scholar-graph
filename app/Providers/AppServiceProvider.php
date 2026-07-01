@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\OpenAlexSearchService;
 use App\Services\OpenRouterService;
 use App\Services\SemanticScholarService;
 use Carbon\CarbonImmutable;
@@ -22,6 +23,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SemanticScholarService::class, function () {
             return new SemanticScholarService(
                 config('services.semantic_scholar.base_url') ?? 'https://api.semanticscholar.org',
+            );
+        });
+
+        $this->app->singleton(OpenAlexSearchService::class, function () {
+            return new OpenAlexSearchService(
+                config('services.openalex.base_url') ?? 'https://api.openalex.org',
+                config('services.openalex.mailto') ?? '',
             );
         });
 

@@ -45,4 +45,9 @@ return [
         'base_url' => env('SEMANTIC_SCHOLAR_BASE_URL', 'https://api.semanticscholar.org'),
     ],
 
+    'openalex' => [
+        'base_url' => env('OPENALEX_BASE_URL', 'https://api.openalex.org'),
+        'mailto' => env('OPENALEX_MAILTO', ''),
+    ],
+
 ];

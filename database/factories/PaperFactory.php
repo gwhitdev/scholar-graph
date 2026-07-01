@@ -20,7 +20,7 @@ class PaperFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
-            'semantic_scholar_id' => fake()->regexify('[a-z0-9]{20}'),
+            'openalex_id' => 'W'.fake()->unique()->numberBetween(1000000000, 9999999999),
             'title' => fake()->sentence(),
             'abstract' => fake()->paragraph(4),
             'year' => fake()->numberBetween(2015, 2024),
@@ -28,7 +28,8 @@ class PaperFactory extends Factory
             'doi' => '10.'.fake()->numberBetween(1000, 9999).'/'.fake()->lexify('?????'),
             'venue' => fake()->randomElement(['Nature', 'Science', 'IEEE', 'ACM', 'Springer']),
             'pages' => fake()->numberBetween(1, 50).'-'.fake()->numberBetween(51, 100),
-            'raw_metadata' => ['source' => 'semantic_scholar'],
+            'cited_by_count' => fake()->numberBetween(0, 10000),
+            'referenced_works' => null,
             'added_at' => now(),
         ];
     }
