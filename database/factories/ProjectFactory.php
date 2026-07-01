@@ -20,7 +20,7 @@ class ProjectFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->words(3, true).' Research',
+            'name' => fake()->sentence(3).' Research',
         ];
     }
 }

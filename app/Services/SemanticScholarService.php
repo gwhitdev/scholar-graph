@@ -33,7 +33,10 @@ class SemanticScholarService
 
         $response->throw();
 
-        return collect($response->json('data', []))
+        /** @var array<int, array<string, mixed>> $papers */
+        $papers = $response->json('data', []);
+
+        return collect($papers)
             ->map(fn (array $paper) => [
                 'semantic_scholar_id' => $paper['paperId'] ?? null,
                 'title' => $paper['title'] ?? 'Untitled',

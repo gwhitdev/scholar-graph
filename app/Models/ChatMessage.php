@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property MessageRole $role
+ */
 class ChatMessage extends Model
 {
     /** @use HasFactory<ChatMessageFactory> */
