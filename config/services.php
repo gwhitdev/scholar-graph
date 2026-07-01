@@ -36,8 +36,9 @@ return [
     ],
 
     'openrouter' => [
-        'key' => env('OPENROUTER_API_KEY'),
-        'model' => env('QWEN_MODEL', 'qwen/qwen2.5-72b-instruct'),
+        'key' => env('QWEN_CLOUD_API_KEY', env('OPENROUTER_API_KEY')),
+        'model' => env('QWEN_MODEL', 'qwen-plus'),
+        'base_url' => env('OPENAI_COMPATIBLE_BASE_URL', 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'),
     ],
 
     'semantic_scholar' => [

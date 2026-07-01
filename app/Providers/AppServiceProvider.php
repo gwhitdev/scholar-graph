@@ -28,7 +28,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(OpenRouterService::class, function () {
             return new OpenRouterService(
                 config('services.openrouter.key') ?? '',
-                config('services.openrouter.model') ?? 'qwen/qwen2.5-72b-instruct',
+                config('services.openrouter.model') ?? 'qwen-plus',
+                config('services.openrouter.base_url') ?? 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
             );
         });
     }

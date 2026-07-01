@@ -4,6 +4,7 @@ import { ChatInput } from '@/components/chat-input';
 import { ChatThread } from '@/components/chat-thread';
 import { PaperCard } from '@/components/paper-card';
 import { PaperSearch } from '@/components/paper-search';
+import { PromptDrawer } from '@/components/prompt-drawer';
 
 interface Paper {
     id: number;
@@ -11,6 +12,10 @@ interface Paper {
     title: string;
     abstract: string | null;
     year: number | null;
+    authors: string[] | null;
+    doi: string | null;
+    venue: string | null;
+    pages: string | null;
 }
 
 interface ChatMessage {
@@ -34,6 +39,9 @@ interface Synthesis {
 interface Project {
     id: number;
     name: string;
+    system_prompt: string | null;
+    use_global_prompt: boolean;
+    negative_prompt: string | null;
 }
 
 interface Props {
@@ -41,14 +49,32 @@ interface Props {
     papers: Paper[];
     chatMessages: ChatMessage[];
     syntheses: Synthesis[];
+    globalSystemPrompt: string | null;
+    globalNegativePrompt: string | null;
 }
 
-export default function ProjectsShow({ project, papers, chatMessages }: Props) {
+export default function ProjectsShow({
+    project,
+    papers,
+    chatMessages,
+    globalSystemPrompt,
+    globalNegativePrompt,
+}: Props) {
     return (
         <>
             <Head title={project.name} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <h1 className="text-2xl font-semibold">{project.name}</h1>
+                <div className="flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold">{project.name}</h1>
+                    <PromptDrawer
+                        projectId={project.id}
+                        systemPrompt={project.system_prompt}
+                        useGlobalPrompt={project.use_global_prompt}
+                        globalSystemPrompt={globalSystemPrompt}
+                        globalNegativePrompt={globalNegativePrompt}
+                        negativePrompt={project.negative_prompt}
+                    />
+                </div>
 
                 <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-2">
                     <div className="flex min-h-0 flex-col gap-4">

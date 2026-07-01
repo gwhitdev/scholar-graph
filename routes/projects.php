@@ -3,6 +3,7 @@
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\PaperController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PromptController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified'])->prefix('projects')->group(function () {
@@ -16,4 +17,6 @@ Route::middleware(['auth', 'verified'])->prefix('projects')->group(function () {
     Route::delete('/{project}/papers/{paper}', [PaperController::class, 'destroy'])->name('papers.destroy');
 
     Route::post('/{project}/chat', [ChatController::class, 'store'])->name('chat.store');
+
+    Route::put('/{project}/prompt', [PromptController::class, 'update'])->name('projects.prompt.update');
 });

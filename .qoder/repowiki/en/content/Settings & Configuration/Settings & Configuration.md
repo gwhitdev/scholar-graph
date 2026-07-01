@@ -95,10 +95,11 @@ SE --> MPK
 ## Core Components
 - ProfileController: Renders the profile settings page, updates profile attributes, and deletes the user account after logout and session invalidation.
 - SecurityController: Renders the security settings page, manages password updates, and integrates with two-factor authentication and passkeys features.
+- PromptSettingsController: Renders the global prompt settings page and manages global system and negative prompts.
 - Form Requests: Encapsulate validation rules for profile updates, password updates, and two-factor state handling.
 - Validation Traits: Centralize reusable validation rules for names, emails, and passwords.
 - Appearance Middleware: Shares the current appearance mode with the view layer.
-- Frontend Pages and Components: Provide the user-facing settings UI for profile, security, and appearance, including two-factor and passkey management.
+- Frontend Pages and Components: Provide the user-facing settings UI for profile, security, appearance, and prompt customization, including two-factor and passkey management.
 
 **Section sources**
 - [ProfileController.php:15-62](file://app/Http/Controllers/Settings/ProfileController.php#L15-L62)
@@ -331,6 +332,45 @@ SC-->>FE : Reload + preserve scroll
 **Section sources**
 - [manage-passkeys.tsx:1-72](file://resources/js/components/manage-passkeys.tsx#L1-L72)
 - [SecurityController.php:14-66](file://app/Http/Controllers/Settings/SecurityController.php#L14-L66)
+
+### Global Prompt Settings
+- Backend:
+  - PromptSettingsController renders the prompt settings page and manages global system and negative prompts.
+  - Validation enforces max length constraints (10000 chars for system prompt, 5000 for negative prompt).
+- Frontend:
+  - Settings page provides textareas for global system prompt and global negative prompt.
+  - Includes a collapsible preview of the default system prompt for reference.
+- Per-project prompts:
+  - The PromptDrawer component on project pages allows editing per-project prompts and negative prompts.
+  - Users can toggle whether to include the global prompt, which is composed with the project prompt.
+  - Suggested prompt chips allow quick addition of common patterns.
+
+```mermaid
+sequenceDiagram
+participant User as "User"
+participant PromptPage as "prompt.tsx"
+participant RT as "routes/settings.php"
+participant PSC as "PromptSettingsController"
+User->>PromptPage : Open prompt settings
+PromptPage->>RT : GET /settings/prompt
+RT->>PSC : edit()
+PSC-->>PromptPage : Render with globalSystemPrompt, globalNegativePrompt
+User->>PromptPage : Update prompts
+PromptPage->>RT : PUT /settings/prompt
+RT->>PSC : update()
+PSC->>PSC : Validate and save
+PSC-->>PromptPage : Flash success + redirect
+```
+
+**Diagram sources**
+- [PromptSettingsController.php:14-41](file://app/Http/Controllers/Settings/PromptSettingsController.php#L14-L41)
+- [prompt.tsx:1-130](file://resources/js/pages/settings/prompt.tsx#L1-L130)
+- [settings.php:26-28](file://routes/settings.php#L26-L28)
+
+**Section sources**
+- [PromptSettingsController.php:1-43](file://app/Http/Controllers/Settings/PromptSettingsController.php#L1-L43)
+- [prompt.tsx:1-130](file://resources/js/pages/settings/prompt.tsx#L1-L130)
+- [prompt-drawer.tsx:1-265](file://resources/js/components/prompt-drawer.tsx#L1-L265)
 
 ## Dependency Analysis
 - Controllers depend on form requests for validation and on Laravel Fortify features for two-factor and passkeys.

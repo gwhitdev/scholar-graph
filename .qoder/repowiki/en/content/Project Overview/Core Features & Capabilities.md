@@ -95,7 +95,8 @@ I --> E
 - AI synthesis engine: Qwen-powered synthesis with explicit attribution to source papers.
 - Cross-paper synthesis: Aggregated across selected papers within a project.
 - Project-based organization: Papers belong to projects; syntheses record which papers were used.
-- Chat with persistent context: Each turn pulls the project’s chat history and paper abstracts.
+- Chat with persistent context: Each turn pulls the project's chat history and paper abstracts.
+- Customizable system prompts: Global and per-project prompts with negative prompts and suggested templates for fine-tuning AI responses.
 - Advanced authentication: Passkeys and two-factor authentication integrated via Laravel Fortify.
 - Settings management: Profile updates, password changes, passkeys, and two-factor controls.
 
@@ -295,6 +296,42 @@ Ctrl-->>UI : "Render persistent chat context"
 **Section sources**
 - [dashboard.tsx:5-26](file://resources/js/pages/dashboard.tsx#L5-L26)
 - [welcome.tsx:5-38](file://resources/js/pages/welcome.tsx#L5-L38)
+
+### Customizable System Prompts with Negative Prompts and Suggestions
+- Global prompts: Users can set a global system prompt in Settings that applies across all projects when enabled.
+- Per-project prompts: Each project can have its own system prompt, which is composed with the global prompt when both are enabled.
+- Negative prompts: Both global and project-level negative prompts allow users to specify what the AI should NOT do (e.g., "Do not use bullet points", "Do not hedge").
+- Suggested prompts: The prompt drawer includes clickable suggestion chips for common prompt patterns (Concise Scholar, Critical Analyst, No Hedging, etc.) that append to the current prompt.
+- Prompt resolution: The system composes global + project prompts together, then appends negative prompts as a "Do NOT" section.
+
+```mermaid
+flowchart TD
+Start(["Synthesis Request"]) --> CheckGlobal{"Global prompt enabled?"}
+CheckGlobal -->|Yes| AddGlobal["Add global system prompt"]
+CheckGlobal -->|No| CheckProject{"Project prompt exists?"}
+AddGlobal --> CheckProject
+CheckProject -->|Yes| AddProject["Add project system prompt"]
+CheckProject -->|No| UseDefault["Use default response guidelines"]
+AddProject --> ComposePrompts["Compose prompts together"]
+UseDefault --> ComposePrompts
+ComposePrompts --> AddNegative{"Negative prompts exist?"}
+AddNegative -->|Yes| AppendNegative["Append 'Do NOT' section"]
+AddNegative -->|No| BuildContext["Build paper context"]
+AppendNegative --> BuildContext
+BuildContext --> SendLLM["Send to LLM"]
+```
+
+**Diagram sources**
+- [SynthesisService.php:105-165](file://app/Services/SynthesisService.php#L105-L165)
+- [prompt-drawer.tsx:1-265](file://resources/js/components/prompt-drawer.tsx#L1-L265)
+- [prompt-suggestions.ts:1-72](file://resources/js/lib/prompt-suggestions.ts#L1-L72)
+
+**Section sources**
+- [SynthesisService.php:105-165](file://app/Services/SynthesisService.php#L105-L165)
+- [PromptController.php:1-32](file://app/Http/Controllers/PromptController.php#L1-L32)
+- [PromptSettingsController.php:1-43](file://app/Http/Controllers/Settings/PromptSettingsController.php#L1-L43)
+- [prompt-drawer.tsx:1-265](file://resources/js/components/prompt-drawer.tsx#L1-L265)
+- [prompt-suggestions.ts:1-72](file://resources/js/lib/prompt-suggestions.ts#L1-L72)
 
 ### Advanced Authentication System (Passkeys and 2FA)
 - Passkeys: Enabled via Fortify with relying party configuration and allowed origins derived from the application URL.

@@ -19,6 +19,10 @@ interface PaperResult {
     title: string;
     abstract: string | null;
     year: number | null;
+    authors: string[];
+    doi: string | null;
+    venue: string | null;
+    pages: string | null;
 }
 
 interface PaperSearchProps {
@@ -164,9 +168,30 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                     <h4 className="text-sm font-medium">
                                         {paper.title}
                                     </h4>
-                                    {paper.year && (
-                                        <p className="text-xs text-muted-foreground">
-                                            {paper.year}
+                                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                        {paper.year && (
+                                            <span>{paper.year}</span>
+                                        )}
+                                        {paper.venue && (
+                                            <span>{paper.venue}</span>
+                                        )}
+                                        {paper.doi && (
+                                            <a
+                                                href={`https://doi.org/${paper.doi}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="underline hover:text-foreground"
+                                            >
+                                                DOI: {paper.doi}
+                                            </a>
+                                        )}
+                                        {paper.pages && (
+                                            <span>pp. {paper.pages}</span>
+                                        )}
+                                    </div>
+                                    {paper.authors.length > 0 && (
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {paper.authors.join(', ')}
                                         </p>
                                     )}
                                     {paper.abstract && (
@@ -200,6 +225,29 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                         name="semantic_scholar_id"
                                         value={paper.semantic_scholar_id ?? ''}
                                     />
+                                    <input
+                                        type="hidden"
+                                        name="doi"
+                                        value={paper.doi ?? ''}
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="venue"
+                                        value={paper.venue ?? ''}
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="pages"
+                                        value={paper.pages ?? ''}
+                                    />
+                                    {paper.authors.map((author, idx) => (
+                                        <input
+                                            key={idx}
+                                            type="hidden"
+                                            name={`authors[${idx}]`}
+                                            value={author}
+                                        />
+                                    ))}
                                     <Button type="submit" size="sm">
                                         Add
                                     </Button>

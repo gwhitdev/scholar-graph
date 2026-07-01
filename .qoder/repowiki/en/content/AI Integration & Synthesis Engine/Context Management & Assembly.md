@@ -45,8 +45,9 @@ Backend --> DB["PostgreSQL<br/>projects, papers, chat_messages, syntheses"]
 - Papers: documents associated with a project, storing title, abstract, and metadata.
 - Chat messages: persisted conversation history enabling session persistence.
 - Syntheses: logged answers with explicit provenance (paper IDs) for traceability.
+- Customizable prompts: Global and per-project system prompts with negative prompts that are composed and appended to the context.
 
-These components underpin the context assembly: every AI turn pulls the project's paper corpus (title + abstract) and recent chat messages, then stores the synthesis outcome with the exact papers used.
+These components underpin the context assembly: every AI turn pulls the project's paper corpus (title + abstract) and recent chat messages, then stores the synthesis outcome with the exact papers used. The system prompt is resolved by composing global and project prompts, then appending negative prompts as a "Do NOT" section.
 
 **Section sources**
 - [HACKATHON_SPEC.md:39-75](file://hackathon/HACKATHON_SPEC.md#L39-L75)
@@ -110,10 +111,18 @@ The assembly algorithm combines project papers and chat history into a cohesive 
 1. Retrieve project papers (title + abstract).
 2. Retrieve recent chat messages (last N).
 3. Concatenate into a single context string with clear delimiters.
-4. Prepend the user's new question to form the final prompt.
-5. Send to the LLM endpoint.
-6. Persist the question-answer pair as chat messages.
-7. Record the synthesis with the set of papers used.
+4. Resolve the system prompt by composing global and project prompts, then appending negative prompts.
+5. Prepend the user's new question to form the final prompt.
+6. Send to the LLM endpoint.
+7. Persist the question-answer pair as chat messages.
+8. Record the synthesis with the set of papers used.
+
+**System Prompt Resolution:**
+- If `use_global_prompt` is enabled and a global system prompt exists, include it.
+- If a project-specific system prompt exists, include it.
+- Compose both prompts together (global first, then project).
+- If neither exists, use the default response guidelines.
+- Append negative prompts (global + project) as a "## Do NOT" section.
 
 ```mermaid
 flowchart TD

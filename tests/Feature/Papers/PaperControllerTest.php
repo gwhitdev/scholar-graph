@@ -21,6 +21,12 @@ test('user can search papers', function () {
                     'title' => 'Test Paper',
                     'abstract' => 'An abstract',
                     'year' => 2023,
+                    'authors' => [
+                        ['authorId' => 'a1', 'name' => 'Alice Smith'],
+                    ],
+                    'externalIds' => ['DOI' => '10.1234/test'],
+                    'venue' => 'Nature',
+                    'journal' => ['name' => 'Nature', 'pages' => '10-20', 'volume' => '42'],
                 ],
             ],
         ], 200),
@@ -34,7 +40,13 @@ test('user can search papers', function () {
 
     $response->assertOk()
         ->assertJsonStructure([
-            ['semantic_scholar_id', 'title', 'abstract', 'year'],
+            ['semantic_scholar_id', 'title', 'abstract', 'year', 'raw_metadata'],
+        ])
+        ->assertJsonFragment([
+            'semantic_scholar_id' => 'abc123',
+            'title' => 'Test Paper',
+            'abstract' => 'An abstract',
+            'year' => 2023,
         ]);
 });
 
@@ -62,6 +74,12 @@ test('user can add a paper to own project', function () {
             'abstract' => 'An abstract',
             'year' => 2023,
             'semantic_scholar_id' => 'abc123',
+            'raw_metadata' => [
+                'authors' => [['name' => 'Alice Smith'], ['name' => 'Bob Jones']],
+                'externalIds' => ['DOI' => '10.1234/test'],
+                'venue' => 'Nature',
+                'journal' => ['pages' => '10-20'],
+            ],
         ])
         ->assertRedirect();
 
@@ -70,6 +88,10 @@ test('user can add a paper to own project', function () {
         'title' => 'Test Paper',
         'semantic_scholar_id' => 'abc123',
     ]);
+
+    $paper = Paper::where('semantic_scholar_id', 'abc123')->first();
+    expect($paper->raw_metadata['authors'][0]['name'])->toBe('Alice Smith');
+    expect($paper->raw_metadata['externalIds']['DOI'])->toBe('10.1234/test');
 });
 
 test('adding same paper twice does not create duplicate', function () {

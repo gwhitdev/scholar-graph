@@ -81,6 +81,7 @@ Config --> OpenRouter
 - Evidence extraction and attribution: Tracks which papers support claims and flags confidence to enable transparent, reproducible responses.
 - Cross-paper synthesis: Selects multiple papers and asks Qwen to reconcile findings, storing the paper set and model used for reproducibility.
 - Transparent responses: The UI surfaces which papers underpin each answer via synthesis records.
+- Customizable system prompts: Users can configure global and per-project prompts with negative prompts to fine-tune AI behavior, with suggested prompt templates for common use cases.
 
 **Section sources**
 - [FULL_SPEC.md:174-185](file://hackathon/FULL_SPEC.md#L174-L185)

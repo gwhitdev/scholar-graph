@@ -23,6 +23,10 @@ class Paper extends Model
         'title',
         'abstract',
         'year',
+        'authors',
+        'doi',
+        'venue',
+        'pages',
         'raw_metadata',
         'added_at',
     ];
@@ -36,6 +40,7 @@ class Paper extends Model
     {
         return [
             'raw_metadata' => 'array',
+            'authors' => 'array',
             'added_at' => 'datetime',
         ];
     }

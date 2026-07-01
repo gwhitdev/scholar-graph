@@ -24,6 +24,10 @@ class PaperFactory extends Factory
             'title' => fake()->sentence(),
             'abstract' => fake()->paragraph(4),
             'year' => fake()->numberBetween(2015, 2024),
+            'authors' => [fake()->name(), fake()->name()],
+            'doi' => '10.'.fake()->numberBetween(1000, 9999).'/'.fake()->lexify('?????'),
+            'venue' => fake()->randomElement(['Nature', 'Science', 'IEEE', 'ACM', 'Springer']),
+            'pages' => fake()->numberBetween(1, 50).'-'.fake()->numberBetween(51, 100),
             'raw_metadata' => ['source' => 'semantic_scholar'],
             'added_at' => now(),
         ];

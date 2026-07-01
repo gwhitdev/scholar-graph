@@ -11,6 +11,10 @@ interface Paper {
     title: string;
     abstract: string | null;
     year: number | null;
+    authors: string[] | null;
+    doi: string | null;
+    venue: string | null;
+    pages: string | null;
 }
 
 interface PaperCardProps {
@@ -45,7 +49,28 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
                         </Link>
                     </Button>
                 </div>
-                {paper.year && <Badge variant="secondary">{paper.year}</Badge>}
+                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    {paper.year && (
+                        <Badge variant="secondary">{paper.year}</Badge>
+                    )}
+                    {paper.venue && <span>{paper.venue}</span>}
+                    {paper.doi && (
+                        <a
+                            href={`https://doi.org/${paper.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-foreground"
+                        >
+                            DOI: {paper.doi}
+                        </a>
+                    )}
+                    {paper.pages && <span>pp. {paper.pages}</span>}
+                </div>
+                {paper.authors && paper.authors.length > 0 && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        {paper.authors.join(', ')}
+                    </p>
+                )}
             </CardHeader>
             {paper.abstract && (
                 <CardContent>

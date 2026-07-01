@@ -22,6 +22,7 @@ class StorePaperRequest extends FormRequest
             'abstract' => ['nullable', 'string'],
             'year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'semantic_scholar_id' => ['nullable', 'string', 'max:64'],
+            'raw_metadata' => ['nullable', 'array'],
         ];
     }
 }
