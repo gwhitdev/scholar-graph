@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'openrouter' => [
+        'key' => env('OPENROUTER_API_KEY'),
+        'model' => env('QWEN_MODEL', 'qwen/qwen2.5-72b-instruct'),
+    ],
+
+    'semantic_scholar' => [
+        'base_url' => env('SEMANTIC_SCHOLAR_BASE_URL', 'https://api.semanticscholar.org'),
+    ],
+
 ];
