@@ -70,7 +70,7 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                     }
                 },
             });
-        }, 300);
+        }, 500);
 
         return () => clearTimeout(timeout);
     }, [data.query, projectId, get]);
