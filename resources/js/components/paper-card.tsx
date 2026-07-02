@@ -11,14 +11,10 @@ import {
     updateStatus,
 } from '@/actions/App/Http/Controllers/PaperController';
 import {
-    colorTokenMap
-    
+    colorTokenMap,
 } from '@/components/CollectionsList';
-import type {CollectionColor} from '@/components/CollectionsList';
-import { Badge } from '@/components/ui/badge';
+import type { CollectionColor } from '@/components/CollectionsList';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -90,8 +86,6 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
         { autoStart: false },
     );
 
-    // Stop polling once the enrichment lands; the button unmounts so the
-    // requested flag needs no reset here.
     useEffect(() => {
         if (enrichmentRequested && paper.enrichment) {
             stop();
@@ -160,201 +154,242 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
     };
 
     return (
-        <Card>
-            <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base leading-snug">
-                        {paper.title}
-                    </CardTitle>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-7 shrink-0"
-                        asChild
+        <article
+            className="rounded-2xl border p-5"
+            style={{
+                background: 'var(--ws-panel)',
+                borderColor: 'var(--ws-line)',
+            }}
+        >
+            {/* Tag chip row */}
+            <div
+                className="flex flex-wrap items-center gap-2 font-mono text-[11.5px]"
+                style={{ color: 'var(--ws-muted)' }}
+            >
+                {paper.venue && (
+                    <span
+                        className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                        style={{
+                            color: 'var(--ws-accent)',
+                            background: 'var(--ws-soft)',
+                        }}
                     >
-                        <Link
-                            href={destroy.url({
-                                project: projectId,
-                                paper: paper.id,
-                            })}
-                            method="delete"
-                            as="button"
-                            aria-label={`Remove ${paper.title}`}
-                        >
-                            <Trash2Icon className="size-4" />
-                        </Link>
-                    </Button>
-                </div>
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    {paper.year && (
-                        <Badge variant="secondary">{paper.year}</Badge>
-                    )}
-                    {paper.venue && <span>{paper.venue}</span>}
-                    {paper.doi && (
-                        <a
-                            href={`https://doi.org/${paper.doi}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline hover:text-foreground"
-                        >
-                            DOI: {paper.doi}
-                        </a>
-                    )}
-                    {paper.pages && <span>pp. {paper.pages}</span>}
-                    {paper.cited_by_count !== null && (
-                        <span>
-                            {paper.cited_by_count.toLocaleString()} citations
-                        </span>
-                    )}
-                </div>
-                {paper.authors && paper.authors.length > 0 && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                        {paper.authors.join(', ')}
-                    </p>
+                        {paper.venue}
+                    </span>
                 )}
-            </CardHeader>
-            {(paper.abstract || paper.enrichment || paper.doi) && (
-                <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2">
-                        <Label
-                            htmlFor={`paper-status-${paper.id}`}
-                            className="text-xs text-muted-foreground"
+                {paper.year && <span>{paper.year}</span>}
+                {paper.venue && paper.year && (
+                    <span
+                        className="size-[3px] rounded-full"
+                        style={{ background: 'var(--ws-faint)' }}
+                        aria-hidden="true"
+                    />
+                )}
+            </div>
+
+            {/* Title */}
+            <h3
+                className="mt-3 font-serif text-[23px] font-medium leading-snug tracking-tight"
+                style={{ color: 'var(--ws-fg)' }}
+            >
+                {paper.title}
+            </h3>
+
+            {/* Authors */}
+            {paper.authors && paper.authors.length > 0 && (
+                <div className="mt-1.5 text-[13px]" style={{ color: 'var(--ws-muted)' }}>
+                    {paper.authors.join(', ')}
+                </div>
+            )}
+
+            {/* TL;DR */}
+            {paper.enrichment?.tldr && (
+                <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--ws-muted)' }}>
+                    <span
+                        className="mr-2 align-[1px] font-mono text-[10.5px] tracking-wide"
+                        style={{ color: 'var(--ws-accent)' }}
+                    >
+                        TL;DR
+                    </span>
+                    {paper.enrichment.tldr}
+                </p>
+            )}
+
+            {/* Status and collections controls */}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                    <label
+                        htmlFor={`paper-status-${paper.id}`}
+                        className="text-xs"
+                        style={{ color: 'var(--ws-muted)' }}
+                    >
+                        Status
+                    </label>
+                    <Select value={paper.pivot.status} onValueChange={handleStatusChange}>
+                        <SelectTrigger
+                            id={`paper-status-${paper.id}`}
+                            className="h-7 w-32 border-[var(--ws-line)] text-xs"
+                            aria-label={`Reading status for ${paper.title}`}
                         >
-                            Status
-                        </Label>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(statusLabels).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                    {label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {collections.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                        <label
+                            htmlFor={`paper-collections-${paper.id}`}
+                            className="text-xs"
+                            style={{ color: 'var(--ws-muted)' }}
+                        >
+                            Collections
+                        </label>
                         <Select
-                            value={paper.pivot.status}
-                            onValueChange={handleStatusChange}
+                            value=""
+                            onValueChange={handleAddToCollection}
+                            disabled={adding || addableCollections.length === 0}
                         >
                             <SelectTrigger
-                                id={`paper-status-${paper.id}`}
-                                className="h-7 w-32 text-xs"
-                                aria-label={`Reading status for ${paper.title}`}
+                                id={`paper-collections-${paper.id}`}
+                                className="h-7 w-40 border-[var(--ws-line)] text-xs"
+                                aria-label={`Add ${paper.title} to a collection`}
                             >
-                                <SelectValue />
+                                <SelectValue placeholder="Add to collection" />
                             </SelectTrigger>
                             <SelectContent>
-                                {Object.entries(statusLabels).map(
-                                    ([value, label]) => (
-                                        <SelectItem
-                                            key={value}
-                                            value={value}
-                                        >
-                                            {label}
-                                        </SelectItem>
-                                    ),
-                                )}
+                                {addableCollections.map((collection) => (
+                                    <SelectItem key={collection.id} value={String(collection.id)}>
+                                        <span className="flex items-center gap-2">
+                                            <span
+                                                className={`inline-block size-2 rounded-full ${colorTokenMap[collection.color]}`}
+                                                aria-hidden="true"
+                                            />
+                                            {collection.name}
+                                        </span>
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
+                        {paperCollections.map((collection) => (
+                            <span
+                                key={collection.id}
+                                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+                                style={{
+                                    background: 'var(--ws-soft)',
+                                    color: 'var(--ws-muted)',
+                                }}
+                            >
+                                <span
+                                    className={`inline-block size-2 rounded-full ${colorTokenMap[collection.color]}`}
+                                    aria-hidden="true"
+                                />
+                                {collection.name}
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveFromCollection(collection.id)}
+                                    disabled={removing}
+                                    aria-label={`Remove ${paper.title} from ${collection.name}`}
+                                    className="ml-0.5 rounded-sm hover:opacity-70"
+                                >
+                                    <XIcon className="size-3" />
+                                </button>
+                            </span>
+                        ))}
                     </div>
-                    {collections.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-2">
-                            <Label
-                                htmlFor={`paper-collections-${paper.id}`}
-                                className="text-xs text-muted-foreground"
-                            >
-                                Collections
-                            </Label>
-                            <Select
-                                value=""
-                                onValueChange={handleAddToCollection}
-                                disabled={adding || addableCollections.length === 0}
-                            >
-                                <SelectTrigger
-                                    id={`paper-collections-${paper.id}`}
-                                    className="h-7 w-40 text-xs"
-                                    aria-label={`Add ${paper.title} to a collection`}
-                                >
-                                    <SelectValue placeholder="Add to collection" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {addableCollections.map((collection) => (
-                                        <SelectItem
-                                            key={collection.id}
-                                            value={String(collection.id)}
-                                        >
-                                            <span className="flex items-center gap-2">
-                                                <span
-                                                    className={`inline-block size-2 rounded-full ${colorTokenMap[collection.color]}`}
-                                                    aria-hidden="true"
-                                                />
-                                                {collection.name}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {paperCollections.map((collection) => (
-                                <Badge
-                                    key={collection.id}
-                                    variant="secondary"
-                                    className="flex items-center gap-1"
-                                >
-                                    <span
-                                        className={`inline-block size-2 rounded-full ${colorTokenMap[collection.color]}`}
-                                        aria-hidden="true"
-                                    />
-                                    {collection.name}
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            handleRemoveFromCollection(collection.id)
-                                        }
-                                        disabled={removing}
-                                        aria-label={`Remove ${paper.title} from ${collection.name}`}
-                                        className="ml-1 rounded-sm hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                    >
-                                        <XIcon className="size-3" />
-                                    </button>
-                                </Badge>
-                            ))}
-                        </div>
-                    )}
-                    {paper.enrichment && (
-                        <div className="rounded-md bg-muted/50 p-3">
-                            <p className="mb-1 flex items-center gap-1 text-xs font-medium">
-                                <SparklesIcon className="size-3" />
-                                TLDR
-                                {paper.enrichment.tldr_source ===
-                                    'generated' && (
-                                    <span className="font-normal text-muted-foreground">
-                                        · AI-generated from abstract
-                                    </span>
-                                )}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                                {paper.enrichment.tldr ??
-                                    'No AI summary is available for this paper.'}
-                            </p>
-                            {paper.enrichment.influential_citation_count !==
-                                null && (
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {paper.enrichment.influential_citation_count.toLocaleString()}{' '}
-                                    influential citations
-                                </p>
-                            )}
-                        </div>
-                    )}
-                    {paper.abstract && (
-                        <p className="line-clamp-4 text-sm text-muted-foreground">
-                            {paper.abstract}
-                        </p>
-                    )}
-                    {!paper.enrichment && (paper.doi || paper.abstract) && (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={requestEnrichment}
-                            disabled={processing || enrichmentRequested}
-                        >
-                            <SparklesIcon className="size-3" />
-                            {enrichmentRequested
-                                ? 'Summary requested...'
-                                : 'Get AI Summary'}
-                        </Button>
-                    )}
-                </CardContent>
+                )}
+            </div>
+
+            {/* Enrichment button */}
+            {!paper.enrichment && (paper.doi || paper.abstract) && (
+                <div className="mt-3">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={requestEnrichment}
+                        disabled={processing || enrichmentRequested}
+                        className="border-[var(--ws-line)] text-xs"
+                    >
+                        <SparklesIcon className="size-3" />
+                        {enrichmentRequested ? 'Summary requested...' : 'Get AI Summary'}
+                    </Button>
+                </div>
             )}
-        </Card>
+
+            {/* Footer bar */}
+            <div
+                className="mt-4 flex items-center gap-3.5 border-t pt-3.5"
+                style={{ borderColor: 'var(--ws-line)' }}
+            >
+                {paper.cited_by_count !== null && (
+                    <span
+                        className="flex items-center gap-1.5 text-[12.5px] font-semibold"
+                        style={{ color: 'var(--ws-fg)' }}
+                    >
+                        <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M10 3l2 5 5 .4-3.8 3.3 1.2 5L10 14l-4.6 2.7 1.2-5L2.8 8.4 8 8z"
+                                stroke="currentColor"
+                                strokeWidth="1.3"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                        {paper.cited_by_count.toLocaleString()}
+                    </span>
+                )}
+                {paper.doi && (
+                    <a
+                        href={`https://doi.org/${paper.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[11px] underline hover:opacity-80"
+                        style={{ color: 'var(--ws-faint)' }}
+                    >
+                        {paper.doi}
+                    </a>
+                )}
+                <span className="flex-1" />
+                {paper.enrichment && (
+                    <button
+                        type="button"
+                        className="flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-[12.5px] font-semibold transition-opacity hover:opacity-80"
+                        style={{
+                            background: 'var(--ws-soft)',
+                            color: 'var(--ws-accent)',
+                        }}
+                    >
+                        Read summary
+                    </button>
+                )}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    asChild
+                >
+                    <Link
+                        href={destroy.url({ project: projectId, paper: paper.id })}
+                        method="delete"
+                        as="button"
+                        aria-label={`Remove ${paper.title}`}
+                    >
+                        <Trash2Icon className="size-4" />
+                    </Link>
+                </Button>
+            </div>
+        </article>
     );
 }

@@ -61,6 +61,12 @@ class ProjectController extends Controller
             'collectionColors' => config('collections.colors'),
             'globalSystemPrompt' => $request->user()->global_system_prompt,
             'globalNegativePrompt' => $request->user()->global_negative_prompt,
+            'assistant' => [
+                'model' => config('services.openrouter.model'),
+            ],
+            'openalex' => [
+                'corpusLabel' => config('services.openalex.corpus_label'),
+            ],
         ]);
     }
 

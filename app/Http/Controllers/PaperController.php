@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Papers\AddPaperByDoiAction;
 use App\Actions\Papers\SavePaperToProjectAction;
+use App\Http\Requests\StorePaperByDoiRequest;
 use App\Http\Requests\StorePaperRequest;
 use App\Http\Requests\UpdatePaperStatusRequest;
 use App\Jobs\EnrichPaperJob;
@@ -53,6 +55,21 @@ class PaperController extends Controller
         $this->authorize('update', $project);
 
         $action->handle($project, $request->validated());
+
+        return redirect()->back();
+    }
+
+    public function storeByDoi(StorePaperByDoiRequest $request, Project $project, AddPaperByDoiAction $action): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        try {
+            $action->handle($project, $request->validated('doi'), $request->user());
+        } catch (\RuntimeException) {
+            return redirect()->back()->withErrors([
+                'doi' => 'Could not find a paper with that DOI. Please check and try again.',
+            ]);
+        }
 
         return redirect()->back();
     }
