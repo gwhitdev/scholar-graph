@@ -165,28 +165,23 @@ GUIDELINES;
     }
 
     /**
-     * Extract authors string from paper raw_metadata or return empty string.
+     * Extract authors string from the paper's authors column or return empty string.
      */
     protected function extractAuthors(Paper $paper): string
     {
-        $authors = $paper->raw_metadata['authors'] ?? [];
-
-        if (empty($authors)) {
+        if (empty($paper->authors)) {
             return '';
         }
 
-        return collect($authors)
-            ->map(fn (array $author) => $author['name'] ?? '')
-            ->filter(fn (string $name) => $name !== '')
-            ->implode(', ');
+        return implode(', ', $paper->authors);
     }
 
     /**
-     * Extract DOI from paper raw_metadata or return empty string.
+     * Extract DOI from the paper's doi column or return empty string.
      */
     protected function extractDoi(Paper $paper): string
     {
-        return $paper->raw_metadata['externalIds']['DOI'] ?? '';
+        return $paper->doi ?? '';
     }
 
     /**

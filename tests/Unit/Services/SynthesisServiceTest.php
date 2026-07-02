@@ -40,19 +40,14 @@ test('build prompt messages contains system papers and user question', function 
     expect($messages[1]['content'])->toBe('What is this about?');
 });
 
-test('build prompt includes authors year and doi from raw metadata', function () {
+test('build prompt includes authors year and doi from flat columns', function () {
     $project = Project::factory()->create();
     Paper::factory()->for($project)->create([
         'title' => 'Positive Psychology',
         'abstract' => 'An introduction.',
         'year' => 2000,
-        'raw_metadata' => [
-            'authors' => [
-                ['name' => 'Seligman, M. E. P.'],
-                ['name' => 'Csikszentmihalyi, M.'],
-            ],
-            'externalIds' => ['DOI' => '10.1037/0003-066X.55.1.5'],
-        ],
+        'authors' => ['Seligman, M. E. P.', 'Csikszentmihalyi, M.'],
+        'doi' => '10.1037/0003-066X.55.1.5',
     ]);
 
     $service = new SynthesisService(new OpenRouterService('key', 'model'));
@@ -70,7 +65,8 @@ test('build prompt omits missing metadata gracefully', function () {
         'title' => 'Bare Paper',
         'abstract' => null,
         'year' => null,
-        'raw_metadata' => null,
+        'authors' => null,
+        'doi' => null,
     ]);
 
     $service = new SynthesisService(new OpenRouterService('key', 'model'));
