@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import AdminNav from '@/components/admin-nav';
 
 interface ModelUsage {
     model: string;
@@ -17,6 +18,7 @@ export default function Usage({ apiUsageBySource, llmUsageByModel, llmUsageTotal
     return (
         <>
             <Head title="Admin - Usage" />
+                        <AdminNav />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <h1 className="text-2xl font-bold">API & LLM Usage</h1>
 

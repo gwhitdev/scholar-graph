@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Billing\GenerateLicenseKeysAction;
+use App\Http\Requests\MintLicenseKeysRequest;
+use App\Models\LicenseKey;
 use App\Services\Admin\AdminMetricsService;
 use App\Services\OpenRouterService;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,5 +41,26 @@ class AdminController extends Controller
             'llmUsageByModel' => $metrics->llmUsageByModel(),
             'llmUsageTotals' => $metrics->llmUsageTotals(),
         ]);
+    }
+
+    public function licenses(): Response
+    {
+        return Inertia::render('admin/licenses', [
+            'licenseKeys' => LicenseKey::with('plan', 'redeemedByUser')->latest()->limit(100)->get(),
+        ]);
+    }
+
+    public function mintLicenseKeys(MintLicenseKeysRequest $request, GenerateLicenseKeysAction $action): RedirectResponse
+    {
+        $action->handle(
+            count: $request->validated('count'),
+            planId: $request->validated('plan_id'),
+            credits: $request->validated('credits'),
+            expiresAt: $request->validated('expires_at') ? Carbon::parse($request->validated('expires_at')) : null,
+        );
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Licence keys minted successfully.']);
+
+        return to_route('admin.licenses.index');
     }
 }

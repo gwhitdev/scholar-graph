@@ -7,12 +7,14 @@ import { PaperCard } from '@/components/paper-card';
 import { PromptDrawer } from '@/components/prompt-drawer';
 import {
     CommandBar,
+    ContentHeader,
     DiscussionPanel,
     IconRail,
     LibraryHeader,
     ProjectSidebar,
     WorkspaceShell,
 } from '@/components/workspace';
+import type { PanelKey } from '@/components/workspace/IconRail';
 import { useState } from 'react';
 
 interface Paper {
@@ -71,6 +73,11 @@ interface Project {
     negative_prompt: string | null;
 }
 
+interface AllProject {
+    id: number;
+    name: string;
+}
+
 interface Props {
     project: Project;
     papers: Paper[];
@@ -87,6 +94,7 @@ interface Props {
     openalex: {
         corpusLabel: string;
     };
+    allProjects: AllProject[];
 }
 
 export default function ProjectsShow({
@@ -100,9 +108,12 @@ export default function ProjectsShow({
     globalNegativePrompt,
     assistant,
     openalex,
+    allProjects,
 }: Props) {
     const [promptDrawerOpen, setPromptDrawerOpen] = useState(false);
     const [sortBy, setSortBy] = useState('date');
+    const [activePanel, setActivePanel] = useState<PanelKey | null>(null);
+    const [discussionExpanded, setDiscussionExpanded] = useState(false);
     const appName = usePage().props.name as string ?? 'ScholarGraph';
 
     // Sort papers
@@ -118,6 +129,13 @@ export default function ProjectsShow({
         }
     });
 
+    // Calculate total citations
+    const totalCitations = papers.reduce((sum, p) => sum + (p.cited_by_count ?? 0), 0);
+
+    const handlePanelToggle = (panel: PanelKey) => {
+        setActivePanel((prev) => (prev === panel ? null : panel));
+    };
+
     const handleFindPapers = () => {
         // Focus the search input in the command bar
         const searchInput = document.getElementById('command-bar-search');
@@ -128,42 +146,51 @@ export default function ProjectsShow({
         <>
             <Head title={project.name} />
             <WorkspaceShell
-                rail={<IconRail appName={appName} />}
+                rail={
+                    <IconRail
+                        appName={appName}
+                        activePanel={activePanel}
+                        onPanelToggle={handlePanelToggle}
+                    />
+                }
                 sidebar={
                     <ProjectSidebar
                         projectName={project.name}
                         projectId={project.id}
+                        allProjects={allProjects}
                         collections={collections}
                         collectionColors={collectionColors}
-                        hasSearched={savedOpenAlexIds.length > 0}
-                        paperCount={papers.length}
-                        chatCount={chatMessages.length}
                         onFindPapers={handleFindPapers}
                         onEditPrompt={() => setPromptDrawerOpen(true)}
+                        onClose={() => setActivePanel(null)}
                     />
                 }
+                sidebarOpen={activePanel !== null}
+                onSidebarClose={() => setActivePanel(null)}
                 library={
                     <>
+                        <ContentHeader
+                            projectName={project.name}
+                            hasSearched={savedOpenAlexIds.length > 0}
+                            paperCount={papers.length}
+                            chatCount={chatMessages.length}
+                            onEditPrompt={() => setPromptDrawerOpen(true)}
+                        />
                         <CommandBar
                             projectId={project.id}
                             savedOpenAlexIds={savedOpenAlexIds}
                             corpusLabel={openalex.corpusLabel}
                         />
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex flex-1 flex-col overflow-y-auto">
                             <LibraryHeader
                                 paperCount={papers.length}
+                                totalCitations={totalCitations}
                                 sortBy={sortBy}
                                 onSortChange={setSortBy}
                             />
-                            <p
-                                className="mx-10 mt-3 max-w-[58ch] text-sm leading-relaxed"
-                                style={{ color: 'var(--ws-muted)' }}
-                            >
-                                Sorted by {sortBy === 'date' ? 'date added' : sortBy}. Open a paper to read its AI summary, or ask the assistant to compare them.
-                            </p>
-                            <div className="mt-6 flex flex-col gap-4 px-10 pb-8">
+                            <div className="flex flex-1 flex-col px-8 pb-8">
                                 {sortedPapers.length === 0 ? (
-                                    <p className="text-sm" style={{ color: 'var(--ws-muted)' }}>
+                                    <p className="mt-6 text-sm" style={{ color: 'var(--ws-muted)' }}>
                                         No papers saved yet. Search and add papers to begin.
                                     </p>
                                 ) : (
@@ -184,11 +211,14 @@ export default function ProjectsShow({
                     <DiscussionPanel
                         assistantModel={assistant.model}
                         paperCount={papers.length}
+                        expanded={discussionExpanded}
+                        onToggleExpand={() => setDiscussionExpanded((prev) => !prev)}
                     >
                         <ChatThread messages={chatMessages} papers={papers} />
                         <ChatInput projectId={project.id} />
                     </DiscussionPanel>
                 }
+                discussionExpanded={discussionExpanded}
             />
             <PromptDrawer
                 projectId={project.id}

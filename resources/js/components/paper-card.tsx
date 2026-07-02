@@ -155,56 +155,51 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
 
     return (
         <article
-            className="rounded-2xl border p-5"
-            style={{
-                background: 'var(--ws-panel)',
-                borderColor: 'var(--ws-line)',
-            }}
+            className="border-t py-5"
+            style={{ borderColor: 'var(--ws-line)' }}
         >
-            {/* Tag chip row */}
+            {/* Title + year row */}
+            <div className="flex items-baseline justify-between gap-3">
+                <h4
+                    className="font-serif text-[21px] font-medium leading-snug tracking-tight"
+                    style={{ color: 'var(--ws-fg)', letterSpacing: '-0.01em' }}
+                >
+                    {paper.title}
+                </h4>
+                {paper.year && (
+                    <span
+                        className="shrink-0 font-mono text-[12px]"
+                        style={{ color: 'var(--ws-faint)' }}
+                    >
+                        {paper.year}
+                    </span>
+                )}
+            </div>
+
+            {/* Authors + venue */}
             <div
-                className="flex flex-wrap items-center gap-2 font-mono text-[11.5px]"
+                className="mt-1.5 flex flex-wrap items-center gap-2 text-[13px]"
                 style={{ color: 'var(--ws-muted)' }}
             >
+                {paper.authors && paper.authors.length > 0 && (
+                    <span>{paper.authors.join(', ')}</span>
+                )}
+                {paper.authors && paper.authors.length > 0 && paper.venue && (
+                    <span style={{ color: 'var(--ws-faint)' }}>·</span>
+                )}
                 {paper.venue && (
                     <span
-                        className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-                        style={{
-                            color: 'var(--ws-accent)',
-                            background: 'var(--ws-soft)',
-                        }}
+                        className="font-serif text-[14.5px] italic"
+                        style={{ color: 'var(--ws-muted)' }}
                     >
                         {paper.venue}
                     </span>
                 )}
-                {paper.year && <span>{paper.year}</span>}
-                {paper.venue && paper.year && (
-                    <span
-                        className="size-[3px] rounded-full"
-                        style={{ background: 'var(--ws-faint)' }}
-                        aria-hidden="true"
-                    />
-                )}
             </div>
-
-            {/* Title */}
-            <h3
-                className="mt-3 font-serif text-[23px] font-medium leading-snug tracking-tight"
-                style={{ color: 'var(--ws-fg)' }}
-            >
-                {paper.title}
-            </h3>
-
-            {/* Authors */}
-            {paper.authors && paper.authors.length > 0 && (
-                <div className="mt-1.5 text-[13px]" style={{ color: 'var(--ws-muted)' }}>
-                    {paper.authors.join(', ')}
-                </div>
-            )}
 
             {/* TL;DR */}
             {paper.enrichment?.tldr && (
-                <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--ws-muted)' }}>
+                <p className="mt-2.5 max-w-[64ch] text-[13.5px] leading-relaxed" style={{ color: 'var(--ws-muted)' }}>
                     <span
                         className="mr-2 align-[1px] font-mono text-[10.5px] tracking-wide"
                         style={{ color: 'var(--ws-accent)' }}
@@ -215,20 +210,52 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                 </p>
             )}
 
-            {/* Status and collections controls */}
+            {/* Tag chip, citations, DOI row */}
             <div className="mt-3 flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2">
+                {paper.venue && (
+                    <span
+                        className="rounded-full px-2.5 py-0.5 text-[11.5px] font-semibold"
+                        style={{
+                            color: 'var(--ws-accent)',
+                            background: 'var(--ws-soft)',
+                        }}
+                    >
+                        {paper.venue}
+                    </span>
+                )}
+                {paper.cited_by_count !== null && (
+                    <span
+                        className="font-mono text-[11.5px]"
+                        style={{ color: 'var(--ws-faint)' }}
+                    >
+                        {paper.cited_by_count.toLocaleString()} citations
+                    </span>
+                )}
+                {paper.doi && (
+                    <a
+                        href={`https://doi.org/${paper.doi}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[11.5px] underline hover:opacity-80"
+                        style={{ color: 'var(--ws-faint)' }}
+                    >
+                        {paper.doi}
+                    </a>
+                )}
+                <span className="flex-1" />
+
+                {/* Status select */}
+                <div className="flex items-center gap-1.5">
                     <label
                         htmlFor={`paper-status-${paper.id}`}
-                        className="text-xs"
-                        style={{ color: 'var(--ws-muted)' }}
+                        className="sr-only"
                     >
                         Status
                     </label>
                     <Select value={paper.pivot.status} onValueChange={handleStatusChange}>
                         <SelectTrigger
                             id={`paper-status-${paper.id}`}
-                            className="h-7 w-32 border-[var(--ws-line)] text-xs"
+                            className="h-6 w-28 border-[var(--ws-line)] text-[11px]"
                             aria-label={`Reading status for ${paper.title}`}
                         >
                             <SelectValue />
@@ -243,14 +270,14 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                     </Select>
                 </div>
 
+                {/* Collections */}
                 {collections.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                         <label
                             htmlFor={`paper-collections-${paper.id}`}
-                            className="text-xs"
-                            style={{ color: 'var(--ws-muted)' }}
+                            className="sr-only"
                         >
-                            Collections
+                            Add to collection
                         </label>
                         <Select
                             value=""
@@ -259,10 +286,10 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                         >
                             <SelectTrigger
                                 id={`paper-collections-${paper.id}`}
-                                className="h-7 w-40 border-[var(--ws-line)] text-xs"
+                                className="h-6 w-36 border-[var(--ws-line)] text-[11px]"
                                 aria-label={`Add ${paper.title} to a collection`}
                             >
-                                <SelectValue placeholder="Add to collection" />
+                                <SelectValue placeholder="+ Collection" />
                             </SelectTrigger>
                             <SelectContent>
                                 {addableCollections.map((collection) => (
@@ -281,14 +308,14 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                         {paperCollections.map((collection) => (
                             <span
                                 key={collection.id}
-                                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+                                className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
                                 style={{
                                     background: 'var(--ws-soft)',
                                     color: 'var(--ws-muted)',
                                 }}
                             >
                                 <span
-                                    className={`inline-block size-2 rounded-full ${colorTokenMap[collection.color]}`}
+                                    className={`inline-block size-1.5 rounded-full ${colorTokenMap[collection.color]}`}
                                     aria-hidden="true"
                                 />
                                 {collection.name}
@@ -299,73 +326,32 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                                     aria-label={`Remove ${paper.title} from ${collection.name}`}
                                     className="ml-0.5 rounded-sm hover:opacity-70"
                                 >
-                                    <XIcon className="size-3" />
+                                    <XIcon className="size-2.5" />
                                 </button>
                             </span>
                         ))}
                     </div>
                 )}
-            </div>
 
-            {/* Enrichment button */}
-            {!paper.enrichment && (paper.doi || paper.abstract) && (
-                <div className="mt-3">
+                {/* Enrichment button */}
+                {!paper.enrichment && (paper.doi || paper.abstract) && (
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={requestEnrichment}
                         disabled={processing || enrichmentRequested}
-                        className="border-[var(--ws-line)] text-xs"
+                        className="h-6 border-[var(--ws-line)] text-[11px]"
                     >
                         <SparklesIcon className="size-3" />
-                        {enrichmentRequested ? 'Summary requested...' : 'Get AI Summary'}
+                        {enrichmentRequested ? 'Summary requested...' : 'AI Summary'}
                     </Button>
-                </div>
-            )}
+                )}
 
-            {/* Footer bar */}
-            <div
-                className="mt-4 flex items-center gap-3.5 border-t pt-3.5"
-                style={{ borderColor: 'var(--ws-line)' }}
-            >
-                {paper.cited_by_count !== null && (
-                    <span
-                        className="flex items-center gap-1.5 text-[12.5px] font-semibold"
-                        style={{ color: 'var(--ws-fg)' }}
-                    >
-                        <svg
-                            width="13"
-                            height="13"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M10 3l2 5 5 .4-3.8 3.3 1.2 5L10 14l-4.6 2.7 1.2-5L2.8 8.4 8 8z"
-                                stroke="currentColor"
-                                strokeWidth="1.3"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                        {paper.cited_by_count.toLocaleString()}
-                    </span>
-                )}
-                {paper.doi && (
-                    <a
-                        href={`https://doi.org/${paper.doi}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-mono text-[11px] underline hover:opacity-80"
-                        style={{ color: 'var(--ws-faint)' }}
-                    >
-                        {paper.doi}
-                    </a>
-                )}
-                <span className="flex-1" />
+                {/* Read summary button */}
                 {paper.enrichment && (
                     <button
                         type="button"
-                        className="flex items-center gap-1.5 rounded-[9px] px-3 py-1.5 text-[12.5px] font-semibold transition-opacity hover:opacity-80"
+                        className="flex items-center gap-1.5 rounded-[9px] px-2.5 py-1 text-[11.5px] font-semibold transition-opacity hover:opacity-80"
                         style={{
                             background: 'var(--ws-soft)',
                             color: 'var(--ws-accent)',
@@ -374,10 +360,12 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                         Read summary
                     </button>
                 )}
+
+                {/* Delete */}
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="size-7"
+                    className="size-6"
                     asChild
                 >
                     <Link
@@ -386,7 +374,7 @@ export function PaperCard({ projectId, paper, collections = [] }: PaperCardProps
                         as="button"
                         aria-label={`Remove ${paper.title}`}
                     >
-                        <Trash2Icon className="size-4" />
+                        <Trash2Icon className="size-3.5" />
                     </Link>
                 </Button>
             </div>

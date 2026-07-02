@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import AdminNav from '@/components/admin-nav';
 
 interface DashboardProps {
     userCount: number;
@@ -33,6 +34,7 @@ export default function Dashboard({
     return (
         <>
             <Head title="Admin Dashboard" />
+            <AdminNav />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <h1 className="text-2xl font-bold">Admin Dashboard</h1>
 

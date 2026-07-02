@@ -1,9 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import { CollectionsList } from '@/components/CollectionsList';
 import type { CollectionColor } from '@/components/CollectionsList';
-import { WorkflowSteps } from '@/components/workspace/WorkflowSteps';
+
+interface Project {
+    id: number;
+    name: string;
+}
 
 interface Collection {
     id: number;
@@ -15,28 +19,36 @@ interface Collection {
 interface ProjectSidebarProps {
     projectName: string;
     projectId: number;
+    allProjects: Project[];
     collections: Collection[];
     collectionColors: CollectionColor[];
-    hasSearched: boolean;
-    paperCount: number;
-    chatCount: number;
     onFindPapers: () => void;
     onEditPrompt: () => void;
+    onClose: () => void;
 }
 
 export function ProjectSidebar({
     projectName,
+    projectId,
+    allProjects,
     collections,
     collectionColors,
-    hasSearched,
-    paperCount,
-    chatCount,
     onFindPapers,
     onEditPrompt,
-    projectId,
+    onClose,
 }: ProjectSidebarProps) {
     return (
-        <div className="flex h-full flex-col px-4 py-5">
+        <div className="relative flex h-full flex-col px-4 py-5">
+            {/* Close button */}
+            <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-3 right-3 flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--ws-soft)]"
+                aria-label="Close sidebar"
+            >
+                <X className="size-3.5" style={{ color: 'var(--ws-faint)' }} />
+            </button>
+
             {/* Breadcrumb */}
             <div className="text-xs" style={{ color: 'var(--ws-faint)' }}>
                 <Link href={projectsIndex()} className="hover:underline">
@@ -45,9 +57,9 @@ export function ProjectSidebar({
                 /
             </div>
 
-            {/* Project name */}
+            {/* Current project name */}
             <h2
-                className="mt-1 font-serif text-[22px] font-medium leading-tight"
+                className="mt-1 pr-6 font-serif text-[22px] font-medium leading-tight"
                 style={{ color: 'var(--ws-fg)' }}
             >
                 {projectName}
@@ -67,41 +79,53 @@ export function ProjectSidebar({
                 Find papers
             </button>
 
-            {/* Workflow */}
-            <div className="mt-6">
+            {/* All projects list */}
+            <div className="mt-5">
                 <div
-                    className="mb-2.5 flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-widest"
+                    className="mb-2 font-mono text-[10.5px] uppercase tracking-widest"
                     style={{ color: 'var(--ws-faint)' }}
                 >
-                    <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        aria-hidden="true"
-                    >
-                        <circle cx="5.5" cy="5" r="1.9" stroke="currentColor" strokeWidth="1.4" />
-                        <circle cx="14.5" cy="15" r="1.9" stroke="currentColor" strokeWidth="1.4" />
-                        <path
-                            d="M7.4 5h4.6a2.5 2.5 0 012.5 2.5V13"
-                            stroke="currentColor"
-                            strokeWidth="1.4"
-                            strokeLinecap="round"
-                        />
-                    </svg>
-                    Workflow
+                    Projects
                 </div>
-                <WorkflowSteps
-                    hasSearched={hasSearched}
-                    paperCount={paperCount}
-                    chatCount={chatCount}
-                />
+                <ul className="flex flex-col gap-0.5">
+                    {allProjects.map((project) => (
+                        <li key={project.id}>
+                            <Link
+                                href={`/projects/${project.id}`}
+                                className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-[13px] transition-colors hover:bg-[var(--ws-soft)]"
+                                style={{
+                                    color:
+                                        project.id === projectId
+                                            ? 'var(--ws-fg)'
+                                            : 'var(--ws-muted)',
+                                    fontWeight: project.id === projectId ? 600 : 400,
+                                    background:
+                                        project.id === projectId
+                                            ? 'var(--ws-soft)'
+                                            : 'transparent',
+                                }}
+                            >
+                                <span
+                                    className="size-1.5 shrink-0 rounded-full"
+                                    style={{
+                                        background:
+                                            project.id === projectId
+                                                ? 'var(--ws-accent)'
+                                                : 'var(--ws-faint)',
+                                    }}
+                                    aria-hidden="true"
+                                />
+                                <span className="truncate">{project.name}</span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </div>
 
             {/* Collections */}
-            <div className="mt-6">
+            <div className="mt-5">
                 <div
-                    className="mb-2.5 flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-widest"
+                    className="mb-2 flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-widest"
                     style={{ color: 'var(--ws-faint)' }}
                 >
                     <svg
@@ -162,7 +186,6 @@ export function ProjectSidebar({
 
 /**
  * Compact collections display for the sidebar.
- * Wraps the full CollectionsList but styled for sidebar context.
  */
 function SidebarCollections({
     projectId,

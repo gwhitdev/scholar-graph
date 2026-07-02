@@ -1,6 +1,5 @@
-import { Link, usePage } from '@inertiajs/react';
-import { FolderOpen } from 'lucide-react';
-import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
+import { usePage } from '@inertiajs/react';
+import { FolderOpen, Library, MessageSquare } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,11 +8,21 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { User } from '@/types';
 
+export type PanelKey = 'projects' | 'library' | 'discuss';
+
 interface IconRailProps {
     appName: string;
+    activePanel: PanelKey | null;
+    onPanelToggle: (panel: PanelKey) => void;
 }
 
-export function IconRail({ appName }: IconRailProps) {
+const navItems: { key: PanelKey; icon: typeof FolderOpen; label: string }[] = [
+    { key: 'projects', icon: FolderOpen, label: 'Projects' },
+    { key: 'library', icon: Library, label: 'Library' },
+    { key: 'discuss', icon: MessageSquare, label: 'Discussion' },
+];
+
+export function IconRail({ appName, activePanel, onPanelToggle }: IconRailProps) {
     const { auth } = usePage().props;
     const user = auth.user as User;
     const initials = user.name
@@ -27,7 +36,7 @@ export function IconRail({ appName }: IconRailProps) {
         <>
             {/* Logo */}
             <div
-                className="mb-3 flex size-8 items-center justify-center rounded-[9px] font-serif text-base font-semibold"
+                className="mb-3.5 flex size-[34px] items-center justify-center rounded-[10px] font-serif text-lg font-semibold"
                 style={{
                     background: 'var(--ws-accent)',
                     color: 'var(--ws-onacc)',
@@ -37,15 +46,28 @@ export function IconRail({ appName }: IconRailProps) {
                 S
             </div>
 
-            {/* Nav icons */}
-            <Link
-                href={projectsIndex()}
-                className="flex size-9 items-center justify-center rounded-[10px] transition-colors hover:opacity-80"
-                style={{ background: 'var(--ws-soft)', color: 'var(--ws-accent)' }}
-                aria-label="Projects"
-            >
-                <FolderOpen className="size-4" />
-            </Link>
+            {/* Nav icons — toggle sidebar panels */}
+            <div className="flex flex-col items-center gap-1.5">
+                {navItems.map(({ key, icon: Icon, label }) => {
+                    const isActive = activePanel === key;
+                    return (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => onPanelToggle(key)}
+                            className="flex size-11 items-center justify-center rounded-xl transition-colors"
+                            style={{
+                                background: isActive ? 'var(--ws-soft)' : 'transparent',
+                                color: isActive ? 'var(--ws-accent)' : 'var(--ws-faint)',
+                            }}
+                            aria-label={label}
+                            aria-pressed={isActive}
+                        >
+                            <Icon className="size-[19px]" />
+                        </button>
+                    );
+                })}
+            </div>
 
             <div className="flex-1" />
 
@@ -54,7 +76,7 @@ export function IconRail({ appName }: IconRailProps) {
                 <DropdownMenuTrigger asChild>
                     <button
                         type="button"
-                        className="flex size-8 items-center justify-center rounded-full border text-xs font-bold transition-colors hover:opacity-80"
+                        className="flex size-9 items-center justify-center rounded-full border text-xs font-semibold transition-colors hover:opacity-80"
                         style={{
                             background: 'var(--ws-panel2)',
                             borderColor: 'var(--ws-line)',
@@ -67,15 +89,15 @@ export function IconRail({ appName }: IconRailProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" side="right">
                     <DropdownMenuItem asChild>
-                        <Link href="/settings/profile">Profile</Link>
+                        <a href="/settings/profile">Profile</a>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/settings/appearance">Appearance</Link>
+                        <a href="/settings/appearance">Appearance</a>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/logout" method="post" as="button">
+                        <a href="/logout" method="post" as="button">
                             Log out
-                        </Link>
+                        </a>
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

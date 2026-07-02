@@ -63,21 +63,23 @@ export function PromptDrawer({
     }
 
     return (
-        <div className="relative w-full">
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsOpen(!isOpen)}
-                className="gap-2"
-            >
-                <SettingsIcon className="size-4" />
-                Edit Prompt
-                {isOpen ? (
-                    <ChevronUpIcon className="size-4" />
-                ) : (
-                    <ChevronDownIcon className="size-4" />
-                )}
-            </Button>
+        <>
+            {!isControlled && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="gap-2"
+                >
+                    <SettingsIcon className="size-4" />
+                    Edit Prompt
+                    {isOpen ? (
+                        <ChevronUpIcon className="size-4" />
+                    ) : (
+                        <ChevronDownIcon className="size-4" />
+                    )}
+                </Button>
+            )}
 
             {isOpen && (
                 <>
@@ -85,10 +87,16 @@ export function PromptDrawer({
                     <div
                         className="fixed inset-0 z-40 bg-black/50"
                         onClick={() => setIsOpen(false)}
+                        aria-hidden="true"
                     />
 
-                    {/* Drawer */}
-                    <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-lg border bg-card p-4 shadow-lg">
+                    {/* Modal */}
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Prompt settings"
+                        className="fixed left-1/2 top-1/2 z-50 max-h-[80vh] w-[min(92vw,34rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-card p-5 shadow-lg"
+                    >
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-sm font-semibold">Prompt Settings</h3>
                             <Button
@@ -272,6 +280,6 @@ export function PromptDrawer({
                     </div>
                 </>
             )}
-        </div>
+        </>
     );
 }
