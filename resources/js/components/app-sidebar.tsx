@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, FolderOpen, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, FolderGit2, FolderOpen, LayoutGrid, Shield } from 'lucide-react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -17,33 +17,45 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Projects',
-        href: projectsIndex(),
-        icon: FolderOpen,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const isAdmin = auth.is_admin === true;
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Projects',
+            href: projectsIndex(),
+            icon: FolderOpen,
+        },
+        ...(isAdmin
+            ? [
+                  {
+                      title: 'Admin',
+                      href: '/admin',
+                      icon: Shield,
+                  } as NavItem,
+              ]
+            : []),
+    ];
+
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'Repository',
+            href: 'https://github.com/laravel/react-starter-kit',
+            icon: FolderGit2,
+        },
+        {
+            title: 'Documentation',
+            href: 'https://laravel.com/docs/starter-kits#react',
+            icon: BookOpen,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

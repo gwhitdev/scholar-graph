@@ -49,6 +49,7 @@ return [
         'base_url' => env('OPENALEX_BASE_URL', 'https://api.openalex.org'),
         'mailto' => env('OPENALEX_MAILTO', ''),
         'api_key' => env('OPENALEX_API_KEY', ''),
+        'corpus_label' => env('OPENALEX_CORPUS_LABEL', '250M+ papers'),
     ],
 
 ];

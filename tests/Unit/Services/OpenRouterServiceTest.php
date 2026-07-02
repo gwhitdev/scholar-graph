@@ -115,3 +115,37 @@ test('allows null usage fields', function () {
         ->and($result->completionTokens)->toBeNull()
         ->and($result->costUsd)->toBeNull();
 });
+
+test('returns key usage data', function (): void {
+    Http::fake([
+        'openrouter.ai/api/v1/auth/key' => Http::response([
+            'data' => [
+                'limit' => 100.0,
+                'usage' => 25.5,
+                'limit_remaining' => 74.5,
+            ],
+        ], 200),
+    ]);
+
+    $service = new OpenRouterService('test-key', 'qwen/test-model');
+    $result = $service->getKeyUsage();
+
+    expect($result['limit'])->toEqual(100.0)
+        ->and($result['usage'])->toEqual(25.5)
+        ->and($result['remaining'])->toEqual(74.5);
+});
+
+test('returns nulls when key usage endpoint fails', function (): void {
+    Http::fake([
+        'openrouter.ai/api/v1/auth/key' => Http::response(['error' => 'forbidden'], 403),
+    ]);
+
+    $service = new OpenRouterService('test-key', 'qwen/test-model');
+    $result = $service->getKeyUsage();
+
+    expect($result)->toBe([
+        'limit' => null,
+        'usage' => null,
+        'remaining' => null,
+    ]);
+});

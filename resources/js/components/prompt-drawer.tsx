@@ -14,6 +14,8 @@ interface PromptDrawerProps {
     globalSystemPrompt: string | null;
     globalNegativePrompt: string | null;
     negativePrompt: string | null;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
 export function PromptDrawer({
@@ -23,8 +25,20 @@ export function PromptDrawer({
     globalSystemPrompt,
     globalNegativePrompt,
     negativePrompt,
+    open: controlledOpen,
+    onOpenChange,
 }: PromptDrawerProps) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [internalOpen, setIsOpenInternal] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const isOpen = isControlled ? controlledOpen : internalOpen;
+
+    function setIsOpen(value: boolean) {
+        if (isControlled) {
+            onOpenChange?.(value);
+        } else {
+            setIsOpenInternal(value);
+        }
+    }
     const [showSuggestions, setShowSuggestions] = useState(false);
     const { data, setData, put, processing } = useForm({
         system_prompt: systemPrompt ?? '',
