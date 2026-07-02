@@ -22,6 +22,7 @@ class PaperEnrichmentFactory extends Factory
             'paper_id' => Paper::factory(),
             'semantic_scholar_id' => fake()->regexify('[a-z0-9]{20}'),
             'tldr' => fake()->paragraph(),
+            'tldr_source' => 'semantic_scholar',
             'influential_citation_count' => fake()->numberBetween(0, 500),
             'related_paper_ids' => null,
             'enriched_at' => now(),

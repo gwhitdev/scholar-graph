@@ -21,6 +21,7 @@ class PaperEnrichment extends Model
         'paper_id',
         'semantic_scholar_id',
         'tldr',
+        'tldr_source',
         'influential_citation_count',
         'related_paper_ids',
         'enriched_at',

@@ -19,6 +19,7 @@ interface Paper {
     cited_by_count: number | null;
     enrichment?: {
         tldr: string | null;
+        tldr_source: 'semantic_scholar' | 'generated' | null;
         influential_citation_count: number | null;
         enriched_at: string | null;
     } | null;

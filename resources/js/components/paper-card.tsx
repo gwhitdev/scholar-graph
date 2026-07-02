@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Enrichment {
     tldr: string | null;
+    tldr_source: 'semantic_scholar' | 'generated' | null;
     influential_citation_count: number | null;
     enriched_at: string | null;
 }
@@ -145,6 +146,12 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
                             <p className="mb-1 flex items-center gap-1 text-xs font-medium">
                                 <SparklesIcon className="size-3" />
                                 TLDR
+                                {paper.enrichment.tldr_source ===
+                                    'generated' && (
+                                    <span className="font-normal text-muted-foreground">
+                                        · AI-generated from abstract
+                                    </span>
+                                )}
                             </p>
                             <p className="text-sm text-muted-foreground">
                                 {paper.enrichment.tldr ??
@@ -164,7 +171,7 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
                             {paper.abstract}
                         </p>
                     )}
-                    {!paper.enrichment && paper.doi && (
+                    {!paper.enrichment && (paper.doi || paper.abstract) && (
                         <Button
                             variant="outline"
                             size="sm"
