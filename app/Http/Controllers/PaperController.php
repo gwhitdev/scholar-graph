@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Papers\SavePaperToProjectAction;
 use App\Http\Requests\StorePaperRequest;
+use App\Http\Requests\UpdatePaperStatusRequest;
 use App\Jobs\EnrichPaperJob;
 use App\Models\Paper;
 use App\Models\Project;
@@ -60,16 +61,27 @@ class PaperController extends Controller
     {
         $this->authorize('update', $project);
 
-        EnrichPaperJob::dispatch($paper);
+        EnrichPaperJob::dispatch($paper, $request->user());
 
         return response()->json(['message' => 'Enrichment queued.'], 202);
+    }
+
+    public function updateStatus(UpdatePaperStatusRequest $request, Project $project, Paper $paper): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $project->papers()->updateExistingPivot($paper->id, [
+            'status' => $request->validated('status'),
+        ]);
+
+        return redirect()->back();
     }
 
     public function destroy(Request $request, Project $project, Paper $paper): RedirectResponse
     {
         $this->authorize('update', $project);
 
-        $paper->delete();
+        $project->papers()->detach($paper->id);
 
         return redirect()->back();
     }

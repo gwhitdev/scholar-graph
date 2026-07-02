@@ -43,9 +43,15 @@ class ProjectController extends Controller
 
         $project->load('user');
 
+        $papers = $project->papers()
+            ->with('enrichment')
+            ->latest('project_papers.added_at')
+            ->get();
+
         return Inertia::render('projects/show', [
             'project' => $project,
-            'papers' => $project->papers()->with('enrichment')->latest('added_at')->get(),
+            'papers' => $papers,
+            'savedOpenAlexIds' => $papers->pluck('openalex_id')->filter()->values()->all(),
             'chatMessages' => $project->chatMessages()
                 ->with('synthesis')
                 ->oldest()

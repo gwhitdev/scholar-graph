@@ -17,6 +17,10 @@ interface Paper {
     venue: string | null;
     pages: string | null;
     cited_by_count: number | null;
+    pivot: {
+        status: string;
+        added_at: string;
+    };
     enrichment?: {
         tldr: string | null;
         tldr_source: 'semantic_scholar' | 'generated' | null;
@@ -54,6 +58,7 @@ interface Project {
 interface Props {
     project: Project;
     papers: Paper[];
+    savedOpenAlexIds: string[];
     chatMessages: ChatMessage[];
     syntheses: Synthesis[];
     globalSystemPrompt: string | null;
@@ -63,6 +68,7 @@ interface Props {
 export default function ProjectsShow({
     project,
     papers,
+    savedOpenAlexIds,
     chatMessages,
     globalSystemPrompt,
     globalNegativePrompt,
@@ -85,7 +91,10 @@ export default function ProjectsShow({
 
                 <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-2">
                     <div className="flex min-h-0 flex-col gap-4">
-                        <PaperSearch projectId={project.id} />
+                        <PaperSearch
+                            projectId={project.id}
+                            savedOpenAlexIds={savedOpenAlexIds}
+                        />
 
                         <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
                             <h2 className="text-sm font-medium">
