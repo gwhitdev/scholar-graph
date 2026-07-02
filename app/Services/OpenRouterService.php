@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\DTO\ChatResult;
 use App\Support\ApiUsageRecorder;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class OpenRouterService
@@ -65,5 +66,28 @@ class OpenRouterService
             costUsd: $response->json('usage.cost'),
             durationMs: $durationMs,
         );
+    }
+
+    /**
+     * @return array{limit: float|null, usage: float|null, remaining: float|null}
+     */
+    public function getKeyUsage(): array
+    {
+        return Cache::remember('openrouter.key_usage', now()->addMinutes(5), function (): array {
+            try {
+                $data = Http::withToken($this->apiKey)
+                    ->timeout(10)
+                    ->get($this->baseUrl.'/auth/key')
+                    ->json('data');
+
+                return [
+                    'limit' => $data['limit'] ?? null,
+                    'usage' => $data['usage'] ?? null,
+                    'remaining' => $data['limit_remaining'] ?? null,
+                ];
+            } catch (\Throwable $e) {
+                return ['limit' => null, 'usage' => null, 'remaining' => null];
+            }
+        });
     }
 }
