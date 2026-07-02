@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Observers\UserObserver;
 use App\Services\OpenAlexSearchService;
 use App\Services\OpenRouterService;
 use App\Services\SemanticScholarService;
@@ -50,6 +52,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->validateRequiredServices();
+
+        User::observe(UserObserver::class);
     }
 
     /**
