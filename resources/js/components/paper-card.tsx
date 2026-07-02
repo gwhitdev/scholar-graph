@@ -138,17 +138,25 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
                     </p>
                 )}
             </CardHeader>
-            {(paper.abstract || paper.enrichment?.tldr || paper.doi) && (
+            {(paper.abstract || paper.enrichment || paper.doi) && (
                 <CardContent className="space-y-3">
-                    {paper.enrichment?.tldr && (
+                    {paper.enrichment && (
                         <div className="rounded-md bg-muted/50 p-3">
                             <p className="mb-1 flex items-center gap-1 text-xs font-medium">
                                 <SparklesIcon className="size-3" />
                                 TLDR
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                {paper.enrichment.tldr}
+                                {paper.enrichment.tldr ??
+                                    'No AI summary is available for this paper.'}
                             </p>
+                            {paper.enrichment.influential_citation_count !==
+                                null && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {paper.enrichment.influential_citation_count.toLocaleString()}{' '}
+                                    influential citations
+                                </p>
+                            )}
                         </div>
                     )}
                     {paper.abstract && (
