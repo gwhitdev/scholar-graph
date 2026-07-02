@@ -21,7 +21,7 @@ class PaperController extends Controller
 
     public function search(Request $request, Project $project): JsonResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
+        $this->authorize('view', $project);
 
         try {
             $results = $this->openAlex->search(
@@ -39,7 +39,7 @@ class PaperController extends Controller
 
     public function store(StorePaperRequest $request, Project $project, SavePaperToProjectAction $action): RedirectResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
+        $this->authorize('update', $project);
 
         $action->handle($project, $request->validated());
 
@@ -48,8 +48,7 @@ class PaperController extends Controller
 
     public function enrich(Request $request, Project $project, Paper $paper): JsonResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
-        abort_unless($paper->project_id === $project->id, 403);
+        $this->authorize('update', $project);
 
         EnrichPaperJob::dispatch($paper);
 
@@ -58,8 +57,7 @@ class PaperController extends Controller
 
     public function destroy(Request $request, Project $project, Paper $paper): RedirectResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
-        abort_unless($paper->project_id === $project->id, 403);
+        $this->authorize('update', $project);
 
         $paper->delete();
 

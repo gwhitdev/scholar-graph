@@ -14,7 +14,7 @@ class ChatController extends Controller
 {
     public function store(StoreChatMessageRequest $request, Project $project, CreateSynthesisAction $action): RedirectResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
+        $this->authorize('update', $project);
 
         try {
             $action->handle($project, $request->validated('question'));

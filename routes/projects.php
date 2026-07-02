@@ -6,7 +6,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PromptController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->prefix('projects')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('projects')->scopeBindings()->group(function () {
     Route::get('/', [ProjectController::class, 'index'])->name('projects.index');
     Route::post('/', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/{project}', [ProjectController::class, 'show'])->name('projects.show');
