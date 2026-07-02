@@ -5,7 +5,7 @@ namespace App\Models;
 use Database\Factories\PaperFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Paper extends Model
@@ -19,7 +19,6 @@ class Paper extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'project_id',
         'openalex_id',
         'title',
         'abstract',
@@ -30,7 +29,6 @@ class Paper extends Model
         'pages',
         'cited_by_count',
         'referenced_works',
-        'added_at',
     ];
 
     /**
@@ -43,16 +41,17 @@ class Paper extends Model
         return [
             'authors' => 'array',
             'referenced_works' => 'array',
-            'added_at' => 'datetime',
         ];
     }
 
     /**
-     * @return BelongsTo<Project, $this>
+     * @return BelongsToMany<Project, $this>
      */
-    public function project(): BelongsTo
+    public function projects(): BelongsToMany
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsToMany(Project::class, 'project_papers')
+            ->withPivot(['user_id', 'status', 'added_at'])
+            ->withTimestamps();
     }
 
     /**

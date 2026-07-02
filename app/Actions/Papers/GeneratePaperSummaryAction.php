@@ -6,6 +6,7 @@ use App\Actions\Usage\LogLlmCallAction;
 use App\Exceptions\OpenRouterException;
 use App\Exceptions\OpenRouterTimeoutException;
 use App\Models\Paper;
+use App\Models\User;
 use App\Services\OpenRouterService;
 
 class GeneratePaperSummaryAction
@@ -21,7 +22,7 @@ class GeneratePaperSummaryAction
      * Returns null when the paper has no abstract or the LLM call fails, so
      * callers can treat generation as best-effort.
      */
-    public function handle(Paper $paper): ?string
+    public function handle(Paper $paper, ?User $user = null): ?string
     {
         if (! $paper->abstract) {
             return null;
@@ -39,7 +40,7 @@ class GeneratePaperSummaryAction
         ];
 
         try {
-            $result = $this->llm->chat($messages, user: $paper->project->user);
+            $result = $this->llm->chat($messages, user: $user);
         } catch (OpenRouterException|OpenRouterTimeoutException) {
             return null;
         }
@@ -50,7 +51,7 @@ class GeneratePaperSummaryAction
 
         $this->logLlmCall->handle(
             result: $result,
-            user: $paper->project->user,
+            user: $user,
             contextType: 'paper_summary',
             contextId: $paper->id,
             prompt: json_encode($messages),

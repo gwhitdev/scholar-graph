@@ -11,7 +11,9 @@ test('project belongs to a user', function () {
 });
 
 test('project has many papers', function () {
-    $project = Project::factory()->has(Paper::factory()->count(3))->create();
+    $project = Project::factory()->create();
+
+    Paper::factory()->count(3)->forProject($project)->create();
 
     expect($project->papers)->toHaveCount(3);
 });

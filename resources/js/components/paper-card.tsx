@@ -1,13 +1,22 @@
-import { Link, useHttp, usePoll } from '@inertiajs/react';
+import { Link, router, useHttp, usePoll } from '@inertiajs/react';
 import { SparklesIcon, Trash2Icon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
     destroy,
     enrich,
+    updateStatus,
 } from '@/actions/App/Http/Controllers/PaperController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface Enrichment {
     tldr: string | null;
@@ -27,6 +36,10 @@ interface Paper {
     venue: string | null;
     pages: string | null;
     cited_by_count: number | null;
+    pivot: {
+        status: string;
+        added_at: string;
+    };
     enrichment?: Enrichment | null;
 }
 
@@ -37,6 +50,13 @@ interface PaperCardProps {
 
 /** Stop polling for enrichment results after this many milliseconds. */
 const ENRICHMENT_POLL_CAP_MS = 60000;
+
+const statusLabels: Record<string, string> = {
+    unread: 'Unread',
+    reading: 'Reading',
+    read: 'Read',
+    excluded: 'Excluded',
+};
 
 export function PaperCard({ projectId, paper }: PaperCardProps) {
     const [enrichmentRequested, setEnrichmentRequested] = useState(false);
@@ -83,6 +103,14 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
                 }, ENRICHMENT_POLL_CAP_MS);
             },
         });
+    };
+
+    const handleStatusChange = (value: string) => {
+        router.patch(
+            updateStatus.url({ project: projectId, paper: paper.id }),
+            { status: value },
+            { preserveScroll: true },
+        );
     };
 
     return (
@@ -141,6 +169,38 @@ export function PaperCard({ projectId, paper }: PaperCardProps) {
             </CardHeader>
             {(paper.abstract || paper.enrichment || paper.doi) && (
                 <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2">
+                        <Label
+                            htmlFor={`paper-status-${paper.id}`}
+                            className="text-xs text-muted-foreground"
+                        >
+                            Status
+                        </Label>
+                        <Select
+                            value={paper.pivot.status}
+                            onValueChange={handleStatusChange}
+                        >
+                            <SelectTrigger
+                                id={`paper-status-${paper.id}`}
+                                className="h-7 w-32 text-xs"
+                                aria-label={`Reading status for ${paper.title}`}
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(statusLabels).map(
+                                    ([value, label]) => (
+                                        <SelectItem
+                                            key={value}
+                                            value={value}
+                                        >
+                                            {label}
+                                        </SelectItem>
+                                    ),
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     {paper.enrichment && (
                         <div className="rounded-md bg-muted/50 p-3">
                             <p className="mb-1 flex items-center gap-1 text-xs font-medium">
