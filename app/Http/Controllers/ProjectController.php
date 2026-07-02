@@ -45,7 +45,7 @@ class ProjectController extends Controller
 
         return Inertia::render('projects/show', [
             'project' => $project,
-            'papers' => $project->papers()->latest('added_at')->get(),
+            'papers' => $project->papers()->with('enrichment')->latest('added_at')->get(),
             'chatMessages' => $project->chatMessages()
                 ->with('synthesis')
                 ->oldest()

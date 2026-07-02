@@ -14,6 +14,7 @@ Route::middleware(['auth', 'verified'])->prefix('projects')->group(function () {
 
     Route::get('/{project}/papers/search', [PaperController::class, 'search'])->name('papers.search');
     Route::post('/{project}/papers', [PaperController::class, 'store'])->name('papers.store');
+    Route::post('/{project}/papers/{paper}/enrich', [PaperController::class, 'enrich'])->name('papers.enrich');
     Route::delete('/{project}/papers/{paper}', [PaperController::class, 'destroy'])->name('papers.destroy');
 
     Route::post('/{project}/chat', [ChatController::class, 'store'])->name('chat.store');
