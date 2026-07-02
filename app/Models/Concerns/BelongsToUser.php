@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models\Concerns;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+trait BelongsToUser
+{
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /** @param  Builder<static>  $query */
+    public function scopeOwnedBy(Builder $query, User $user): Builder
+    {
+        return $query->where($this->qualifyColumn('user_id'), $user->id);
+    }
+}

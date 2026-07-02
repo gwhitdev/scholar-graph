@@ -183,5 +183,5 @@ test('user cannot enrich paper from different project via own project', function
 
     $this->actingAs($user)
         ->postJson(route('papers.enrich', [$ownProject, $otherPaper]))
-        ->assertForbidden();
+        ->assertNotFound();
 });

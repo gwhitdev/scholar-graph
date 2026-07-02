@@ -14,7 +14,7 @@ class PromptController extends Controller
      */
     public function update(Request $request, Project $project): RedirectResponse
     {
-        abort_unless($project->user_id === $request->user()->id, 403);
+        $this->authorize('update', $project);
 
         $validated = $request->validate([
             'system_prompt' => ['nullable', 'string', 'max:10000'],
