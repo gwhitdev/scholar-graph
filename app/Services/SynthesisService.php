@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Actions\Usage\LogLlmCallAction;
 use App\Enums\MessageRole;
 use App\Exceptions\OpenRouterException;
 use App\Exceptions\OpenRouterTimeoutException;
@@ -33,6 +34,7 @@ GUIDELINES;
 
     public function __construct(
         protected OpenRouterService $openRouter,
+        protected LogLlmCallAction $logLlmCall,
     ) {}
 
     /**
@@ -207,15 +209,23 @@ GUIDELINES;
             ]);
 
             $messages = $this->buildPromptMessages($project, $question);
-            $answer = $this->openRouter->chat($messages);
+            $result = $this->openRouter->chat($messages, user: $project->user);
 
-            $synthesis->update(['answer' => $answer]);
+            $synthesis->update(['answer' => $result->content]);
 
             $project->chatMessages()->create([
                 'synthesis_id' => $synthesis->id,
                 'role' => MessageRole::Assistant,
-                'content' => $answer,
+                'content' => $result->content,
             ]);
+
+            $this->logLlmCall->handle(
+                result: $result,
+                user: $project->user,
+                contextType: 'synthesis',
+                contextId: $synthesis->id,
+                prompt: json_encode($messages),
+            );
 
             return $synthesis->fresh();
         });

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Papers;
 
+use App\Actions\Usage\LogLlmCallAction;
 use App\Exceptions\OpenRouterException;
 use App\Exceptions\OpenRouterTimeoutException;
 use App\Models\Paper;
@@ -11,6 +12,7 @@ class GeneratePaperSummaryAction
 {
     public function __construct(
         protected OpenRouterService $llm,
+        protected LogLlmCallAction $logLlmCall,
     ) {}
 
     /**
@@ -25,21 +27,35 @@ class GeneratePaperSummaryAction
             return null;
         }
 
+        $messages = [
+            [
+                'role' => 'system',
+                'content' => 'You write one-to-two sentence TLDR summaries of academic papers based on their title and abstract. Respond with only the summary text, no preamble.',
+            ],
+            [
+                'role' => 'user',
+                'content' => "Title: {$paper->title}\n\nAbstract: {$paper->abstract}",
+            ],
+        ];
+
         try {
-            $summary = $this->llm->chat([
-                [
-                    'role' => 'system',
-                    'content' => 'You write one-to-two sentence TLDR summaries of academic papers based on their title and abstract. Respond with only the summary text, no preamble.',
-                ],
-                [
-                    'role' => 'user',
-                    'content' => "Title: {$paper->title}\n\nAbstract: {$paper->abstract}",
-                ],
-            ]);
+            $result = $this->llm->chat($messages, user: $paper->project->user);
         } catch (OpenRouterException|OpenRouterTimeoutException) {
             return null;
         }
 
-        return $summary !== '' ? $summary : null;
+        if ($result->content === '') {
+            return null;
+        }
+
+        $this->logLlmCall->handle(
+            result: $result,
+            user: $paper->project->user,
+            contextType: 'paper_summary',
+            contextId: $paper->id,
+            prompt: json_encode($messages),
+        );
+
+        return $result->content;
     }
 }

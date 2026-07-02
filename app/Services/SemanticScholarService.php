@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Support\ApiUsageRecorder;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -22,9 +24,9 @@ class SemanticScholarService
      * retry later. Only successful results are cached; Cache::remember would
      * cache the null and permanently block retries.
      *
-     * @return array{tldr: string|null, influential_citation_count: int|null}|null
+     * @return array{tldr: string|null, influential_citation_count: int|null, abstract: string|null}|null
      */
-    public function enrich(string $doi): ?array
+    public function enrich(string $doi, ?User $user = null): ?array
     {
         $cacheKey = "semantic_scholar:enrich:{$doi}";
 
@@ -34,14 +36,25 @@ class SemanticScholarService
             return $cached;
         }
 
+        $start = microtime(true);
+
         try {
             $response = Http::timeout(30)
                 ->get($this->baseUrl.'/graph/v1/paper/DOI:'.$doi, [
-                    'fields' => 'tldr,influentialCitationCount',
+                    'fields' => 'tldr,influentialCitationCount,abstract',
                 ]);
         } catch (ConnectionException) {
             return null;
         }
+
+        ApiUsageRecorder::record(
+            service: 'semantic_scholar',
+            endpoint: '/graph/v1/paper/DOI:'.$doi,
+            status: $response->status(),
+            durationMs: (int) round((microtime(true) - $start) * 1000),
+            user: $user,
+            method: 'GET',
+        );
 
         if ($response->failed()) {
             return null;
@@ -50,9 +63,14 @@ class SemanticScholarService
         $result = [
             'tldr' => $response->json('tldr.text'),
             'influential_citation_count' => $response->json('influentialCitationCount'),
+            'abstract' => $response->json('abstract'),
         ];
 
-        Cache::put($cacheKey, $result, self::ENRICH_TTL);
+        // Only cache when we actually got a TLDR -- caching a null TLDR would
+        // block the LLM fallback in EnrichPaperJob for the full TTL window.
+        if ($result['tldr'] !== null) {
+            Cache::put($cacheKey, $result, self::ENRICH_TTL);
+        }
 
         return $result;
     }
@@ -62,11 +80,13 @@ class SemanticScholarService
      *
      * @return array<int, array{semantic_scholar_id: string|null, title: string, year: int|null, authors: list<string>}>
      */
-    public function getRelatedPapers(string $semanticScholarId, int $limit = 5): array
+    public function getRelatedPapers(string $semanticScholarId, int $limit = 5, ?User $user = null): array
     {
         $cacheKey = "semantic_scholar:related:{$semanticScholarId}:{$limit}";
 
-        return Cache::remember($cacheKey, self::ENRICH_TTL, function () use ($semanticScholarId, $limit) {
+        return Cache::remember($cacheKey, self::ENRICH_TTL, function () use ($semanticScholarId, $limit, $user) {
+            $start = microtime(true);
+
             $response = Http::timeout(30)
                 ->get($this->baseUrl.'/graph/v1/paper/'.$semanticScholarId.'/recommendations', [
                     'fields' => 'title,year,authors',
@@ -74,6 +94,15 @@ class SemanticScholarService
                 ]);
 
             $response->throw();
+
+            ApiUsageRecorder::record(
+                service: 'semantic_scholar',
+                endpoint: '/graph/v1/paper/'.$semanticScholarId.'/recommendations',
+                status: $response->status(),
+                durationMs: (int) round((microtime(true) - $start) * 1000),
+                user: $user,
+                method: 'GET',
+            );
 
             /** @var array<int, array<string, mixed>> $papers */
             $papers = $response->json('recommendedPapers', []);

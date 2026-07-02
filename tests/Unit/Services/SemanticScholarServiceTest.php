@@ -23,6 +23,23 @@ test('enrich returns tldr and influential citation count', function () {
         ->and($result['influential_citation_count'])->toBe(342);
 });
 
+test('enrich returns abstract when s2 provides one', function () {
+    Http::fake([
+        'api.semanticscholar.org/*' => Http::response([
+            'paperId' => 'abc123',
+            'abstract' => 'The abstract from Semantic Scholar.',
+            'tldr' => null,
+            'influentialCitationCount' => 5,
+        ], 200),
+    ]);
+
+    $result = $this->service->enrich('10.1038/test');
+
+    expect($result['abstract'])->toBe('The abstract from Semantic Scholar.');
+
+    Http::assertSent(fn ($request) => str_contains($request->url(), 'abstract'));
+});
+
 test('enrich returns null on 429', function () {
     Http::fake([
         'api.semanticscholar.org/*' => Http::response([], 429),

@@ -2,11 +2,12 @@
 
 use App\Exceptions\OpenRouterException;
 use App\Exceptions\OpenRouterTimeoutException;
+use App\Services\DTO\ChatResult;
 use App\Services\OpenRouterService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 
-test('returns assistant content on successful response', function () {
+test('returns content, tokens, cost and duration', function () {
     Http::fake([
         'openrouter.ai/api/v1/chat/completions' => Http::response([
             'choices' => [
@@ -16,15 +17,31 @@ test('returns assistant content on successful response', function () {
                     ],
                 ],
             ],
+            'usage' => [
+                'prompt_tokens' => 10,
+                'completion_tokens' => 20,
+                'cost' => 0.0003,
+            ],
         ], 200),
     ]);
 
     $service = new OpenRouterService('test-key', 'qwen/test-model');
-    $answer = $service->chat([
+    $result = $service->chat([
         ['role' => 'user', 'content' => 'Hello'],
     ]);
 
-    expect($answer)->toBe('This is the answer.');
+    expect($result)
+        ->toBeInstanceOf(ChatResult::class)
+        ->and($result->content)->toBe('This is the answer.')
+        ->and($result->model)->toBe('qwen/test-model')
+        ->and($result->promptTokens)->toBe(10)
+        ->and($result->completionTokens)->toBe(20)
+        ->and($result->costUsd)->toBe(0.0003)
+        ->and($result->durationMs)->toBeGreaterThanOrEqual(0);
+
+    Http::assertSent(function ($request) {
+        return $request['usage'] === ['include' => true];
+    });
 });
 
 test('throws custom exception on failed response', function () {
@@ -63,11 +80,38 @@ test('uses provided model override', function () {
     ]);
 
     $service = new OpenRouterService('test-key', 'qwen/test-model');
-    $service->chat([
+    $result = $service->chat([
         ['role' => 'user', 'content' => 'Hello'],
     ], 'other-model');
+
+    expect($result->content)->toBe('OK')
+        ->and($result->model)->toBe('other-model');
 
     Http::assertSent(function ($request) {
         return $request['model'] === 'other-model';
     });
+});
+
+test('allows null usage fields', function () {
+    Http::fake([
+        'openrouter.ai/api/v1/chat/completions' => Http::response([
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => 'Answer without usage.',
+                    ],
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $service = new OpenRouterService('test-key', 'qwen/test-model');
+    $result = $service->chat([
+        ['role' => 'user', 'content' => 'Hello'],
+    ]);
+
+    expect($result->content)->toBe('Answer without usage.')
+        ->and($result->promptTokens)->toBeNull()
+        ->and($result->completionTokens)->toBeNull()
+        ->and($result->costUsd)->toBeNull();
 });

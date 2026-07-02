@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Support\ApiUsageRecorder;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -25,11 +27,13 @@ class OpenAlexSearchService
      *
      * @return array<int, array{openalex_id: string|null, doi: string|null, title: string, abstract: string|null, year: int|null, authors: list<string>, venue: string|null, cited_by_count: int|null, referenced_works: list<string>}>
      */
-    public function search(string $query, int $limit = 10, int $page = 1): array
+    public function search(string $query, int $limit = 10, int $page = 1, ?User $user = null): array
     {
         $cacheKey = "openalex:search:{$query}:{$limit}:{$page}";
 
-        return Cache::remember($cacheKey, self::SEARCH_TTL, function () use ($query, $limit, $page) {
+        return Cache::remember($cacheKey, self::SEARCH_TTL, function () use ($query, $limit, $page, $user) {
+            $start = microtime(true);
+
             $response = $this->request()
                 ->get($this->baseUrl.'/works', array_merge([
                     'search' => $query,
@@ -38,6 +42,15 @@ class OpenAlexSearchService
                 ], $this->identityParams()));
 
             $response->throw();
+
+            ApiUsageRecorder::record(
+                service: 'openalex',
+                endpoint: '/works',
+                status: $response->status(),
+                durationMs: (int) round((microtime(true) - $start) * 1000),
+                user: $user,
+                method: 'GET',
+            );
 
             /** @var array<int, array<string, mixed>> $works */
             $works = $response->json('results', []);
@@ -53,15 +66,26 @@ class OpenAlexSearchService
      *
      * @return array{openalex_id: string|null, doi: string|null, title: string, abstract: string|null, year: int|null, authors: list<string>, venue: string|null, cited_by_count: int|null, referenced_works: list<string>}
      */
-    public function getWork(string $openAlexId): array
+    public function getWork(string $openAlexId, ?User $user = null): array
     {
         $cacheKey = "openalex:work:{$openAlexId}";
 
-        return Cache::remember($cacheKey, self::WORK_TTL, function () use ($openAlexId) {
+        return Cache::remember($cacheKey, self::WORK_TTL, function () use ($openAlexId, $user) {
+            $start = microtime(true);
+
             $response = $this->request()
                 ->get($this->baseUrl.'/works/'.$openAlexId, $this->identityParams());
 
             $response->throw();
+
+            ApiUsageRecorder::record(
+                service: 'openalex',
+                endpoint: '/works/'.$openAlexId,
+                status: $response->status(),
+                durationMs: (int) round((microtime(true) - $start) * 1000),
+                user: $user,
+                method: 'GET',
+            );
 
             return $this->normalizeWork($response->json());
         });

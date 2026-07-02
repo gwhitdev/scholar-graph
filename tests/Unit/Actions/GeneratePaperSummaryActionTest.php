@@ -1,13 +1,15 @@
 <?php
 
 use App\Actions\Papers\GeneratePaperSummaryAction;
+use App\Actions\Usage\LogLlmCallAction;
 use App\Models\Paper;
 use App\Services\OpenRouterService;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
     $this->action = new GeneratePaperSummaryAction(
-        new OpenRouterService('key', 'qwen-plus', 'https://llm.test')
+        new OpenRouterService('key', 'qwen-plus', 'https://llm.test'),
+        new LogLlmCallAction,
     );
 });
 
