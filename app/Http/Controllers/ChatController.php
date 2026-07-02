@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Actions\Syntheses\CreateSynthesisAction;
+use App\Exceptions\OpenRouterException;
+use App\Exceptions\OpenRouterTimeoutException;
+use App\Http\Requests\StoreChatMessageRequest;
+use App\Models\Project;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+
+class ChatController extends Controller
+{
+    public function store(StoreChatMessageRequest $request, Project $project, CreateSynthesisAction $action): RedirectResponse
+    {
+        abort_unless($project->user_id === $request->user()->id, 403);
+
+        try {
+            $action->handle($project, $request->validated('question'));
+        } catch (OpenRouterTimeoutException) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'The model took too long to respond. Please try again.',
+            ]);
+        } catch (OpenRouterException $e) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'The model failed to respond. Please try again.',
+            ]);
+        }
+
+        return redirect()->back();
+    }
+}
