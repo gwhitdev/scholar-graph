@@ -43,16 +43,31 @@ class ProjectController extends Controller
 
         $project->load('user');
 
+        $papers = $project->papers()
+            ->with('enrichment')
+            ->latest('project_papers.added_at')
+            ->get();
+
         return Inertia::render('projects/show', [
             'project' => $project,
-            'papers' => $project->papers()->with('enrichment')->latest('added_at')->get(),
+            'papers' => $papers,
+            'savedOpenAlexIds' => $papers->pluck('openalex_id')->filter()->values()->all(),
             'chatMessages' => $project->chatMessages()
                 ->with('synthesis')
                 ->oldest()
                 ->get(),
             'syntheses' => $project->syntheses()->latest()->get(),
+            'collections' => $project->collections()->with('papers:id')->get(),
+            'collectionColors' => config('collections.colors'),
             'globalSystemPrompt' => $request->user()->global_system_prompt,
             'globalNegativePrompt' => $request->user()->global_negative_prompt,
+            'assistant' => [
+                'model' => config('services.openrouter.model'),
+            ],
+            'openalex' => [
+                'corpusLabel' => config('services.openalex.corpus_label'),
+            ],
+            'allProjects' => $request->user()->projects()->latest()->get(['id', 'name']),
         ]);
     }
 

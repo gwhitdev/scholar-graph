@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Http;
 
 test('build context returns papers and messages', function () {
     $project = Project::factory()->create();
-    Paper::factory()->for($project)->count(2)->create();
+    Paper::factory()->forProject($project)->count(2)->create();
     ChatMessage::factory()->for($project)->count(3)->create();
 
     $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
@@ -25,7 +25,7 @@ test('build context returns papers and messages', function () {
 
 test('build prompt messages contains system papers and user question', function () {
     $project = Project::factory()->create();
-    Paper::factory()->for($project)->create([
+    Paper::factory()->forProject($project)->create([
         'title' => 'Sample Paper',
         'abstract' => 'Sample abstract',
     ]);
@@ -43,7 +43,7 @@ test('build prompt messages contains system papers and user question', function 
 
 test('build prompt includes authors year and doi from flat columns', function () {
     $project = Project::factory()->create();
-    Paper::factory()->for($project)->create([
+    Paper::factory()->forProject($project)->create([
         'title' => 'Positive Psychology',
         'abstract' => 'An introduction.',
         'year' => 2000,
@@ -62,7 +62,7 @@ test('build prompt includes authors year and doi from flat columns', function ()
 
 test('build prompt omits missing metadata gracefully', function () {
     $project = Project::factory()->create();
-    Paper::factory()->for($project)->create([
+    Paper::factory()->forProject($project)->create([
         'title' => 'Bare Paper',
         'abstract' => null,
         'year' => null,
@@ -218,7 +218,7 @@ test('synthesise creates records and calls openrouter', function () {
 
     $user = User::factory()->create();
     $project = Project::factory()->for($user)->create();
-    $paper = Paper::factory()->for($project)->create();
+    $paper = Paper::factory()->forProject($project)->create();
 
     $service = new SynthesisService(new OpenRouterService('key', 'qwen/test-model'), new LogLlmCallAction);
     $synthesis = $service->synthesise($project, 'Summarise this paper.');

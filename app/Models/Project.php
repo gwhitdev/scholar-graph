@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToUser;
 use Database\Factories\ProjectFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
@@ -40,11 +41,13 @@ class Project extends Model
     }
 
     /**
-     * @return HasMany<Paper, $this>
+     * @return BelongsToMany<Paper, $this>
      */
-    public function papers(): HasMany
+    public function papers(): BelongsToMany
     {
-        return $this->hasMany(Paper::class);
+        return $this->belongsToMany(Paper::class, 'project_papers')
+            ->withPivot(['user_id', 'status', 'added_at'])
+            ->withTimestamps();
     }
 
     /**
@@ -61,5 +64,13 @@ class Project extends Model
     public function chatMessages(): HasMany
     {
         return $this->hasMany(ChatMessage::class);
+    }
+
+    /**
+     * @return HasMany<Collection, $this>
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class)->orderBy('position');
     }
 }

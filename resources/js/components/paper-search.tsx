@@ -27,6 +27,7 @@ interface PaperResult {
 
 interface PaperSearchProps {
     projectId: number;
+    savedOpenAlexIds: string[];
 }
 
 function buildSearchUrl(projectId: number, query: string): string {
@@ -37,7 +38,7 @@ function buildSearchUrl(projectId: number, query: string): string {
     return url.pathname + url.search;
 }
 
-export function PaperSearch({ projectId }: PaperSearchProps) {
+export function PaperSearch({ projectId, savedOpenAlexIds }: PaperSearchProps) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<PaperResult[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
@@ -136,7 +137,12 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                         </p>
                     )}
 
-                    {results.map((paper) => (
+                    {results.map((paper) => {
+                        const isAdded = paper.openalex_id
+                            ? savedOpenAlexIds.includes(paper.openalex_id)
+                            : false;
+
+                        return (
                         <div
                             key={paper.openalex_id ?? paper.title}
                             className="rounded-lg border p-3 transition-colors hover:bg-accent/50"
@@ -237,13 +243,23 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                             value={work}
                                         />
                                     ))}
-                                    <Button type="submit" size="sm">
-                                        Add
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        disabled={isAdded}
+                                        aria-label={
+                                            isAdded
+                                                ? `${paper.title} is already added`
+                                                : `Add ${paper.title}`
+                                        }
+                                    >
+                                        {isAdded ? 'Added ✓' : 'Add'}
                                     </Button>
                                 </Form>
                             </div>
                         </div>
-                    ))}
+                    )
+})}
                 </div>
             </CardContent>
         </Card>
