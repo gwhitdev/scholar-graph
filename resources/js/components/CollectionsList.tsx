@@ -1,7 +1,9 @@
 import { Link, useForm } from '@inertiajs/react';
+import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import { useState } from 'react';
 import {
     destroy,
+    reorder,
     store,
     update,
 } from '@/actions/App/Http/Controllers/CollectionController';
@@ -79,6 +81,10 @@ export function CollectionsList({ projectId, collections }: CollectionsListProps
         color: 'sage',
     });
 
+    const reorderForm = useForm({
+        collection_ids: collections.map((collection) => collection.id),
+    });
+
     const handleCreateSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         createForm.post(store.url({ project: projectId }), {
@@ -112,6 +118,31 @@ export function CollectionsList({ projectId, collections }: CollectionsListProps
                 },
             },
         );
+    };
+
+    const submitReorder = (orderedCollections: Collection[]) => {
+        reorderForm.setData(
+            'collection_ids',
+            orderedCollections.map((collection) => collection.id),
+        );
+
+        reorderForm.patch(reorder.url({ project: projectId }), {
+            preserveScroll: true,
+        });
+    };
+
+    const moveCollection = (index: number, direction: 'up' | 'down') => {
+        const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+        if (newIndex < 0 || newIndex >= collections.length) {
+            return;
+        }
+
+        const reordered = [...collections];
+        const [moved] = reordered.splice(index, 1);
+        reordered.splice(newIndex, 0, moved);
+
+        submitReorder(reordered);
     };
 
     return (
@@ -186,7 +217,7 @@ export function CollectionsList({ projectId, collections }: CollectionsListProps
                 </p>
             ) : (
                 <ul className="space-y-2">
-                    {collections.map((collection) => (
+                    {collections.map((collection, index) => (
                         <li
                             key={collection.id}
                             className="flex items-center justify-between gap-2 rounded-md border border-sidebar-border/70 p-2"
@@ -199,6 +230,28 @@ export function CollectionsList({ projectId, collections }: CollectionsListProps
                                 <Badge variant="secondary">{collection.papers.length}</Badge>
                             </div>
                             <div className="flex shrink-0 items-center gap-1">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7"
+                                    disabled={index === 0 || reorderForm.processing}
+                                    onClick={() => moveCollection(index, 'up')}
+                                    aria-label={`Move ${collection.name} up`}
+                                >
+                                    <ArrowUpIcon className="size-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-7"
+                                    disabled={
+                                        index === collections.length - 1 || reorderForm.processing
+                                    }
+                                    onClick={() => moveCollection(index, 'down')}
+                                    aria-label={`Move ${collection.name} down`}
+                                >
+                                    <ArrowDownIcon className="size-4" />
+                                </Button>
                                 <Dialog
                                     open={editingCollection?.id === collection.id}
                                     onOpenChange={(open) => {

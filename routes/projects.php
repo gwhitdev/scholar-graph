@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->prefix('projects')->scopeBindings()->gr
 
     Route::get('/{project}/collections', [CollectionController::class, 'index'])->name('collections.index');
     Route::post('/{project}/collections', [CollectionController::class, 'store'])->name('collections.store');
+    Route::patch('/{project}/collections/reorder', [CollectionController::class, 'reorder'])->name('collections.reorder');
     Route::patch('/{project}/collections/{collection}', [CollectionController::class, 'update'])->name('collections.update');
     Route::delete('/{project}/collections/{collection}', [CollectionController::class, 'destroy'])->name('collections.destroy');
     Route::post('/{project}/collections/{collection}/papers', [CollectionController::class, 'addPaper'])->name('collections.papers.add');

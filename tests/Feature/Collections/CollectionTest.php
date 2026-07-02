@@ -176,3 +176,32 @@ test('forbids adding a paper to another users collection', function () {
         ])
         ->assertForbidden();
 });
+
+test('lets a user reorder collections', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+    $first = Collection::factory()->for($project)->create(['position' => 0, 'name' => 'First']);
+    $second = Collection::factory()->for($project)->create(['position' => 1, 'name' => 'Second']);
+
+    $this->actingAs($user)
+        ->patch(route('collections.reorder', $project), [
+            'collection_ids' => [$second->id, $first->id],
+        ])
+        ->assertRedirect();
+
+    expect(Collection::find($second->id)->position)->toBe(0);
+    expect(Collection::find($first->id)->position)->toBe(1);
+});
+
+test('forbids reordering collections in another users project', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $otherProject = Project::factory()->for($otherUser)->create();
+    $collection = Collection::factory()->for($otherProject)->create();
+
+    $this->actingAs($user)
+        ->patch(route('collections.reorder', $otherProject), [
+            'collection_ids' => [$collection->id],
+        ])
+        ->assertForbidden();
+});

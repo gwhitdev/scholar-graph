@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Actions\Collections\AddPaperToCollectionAction;
 use App\Actions\Collections\CreateCollectionAction;
+use App\Actions\Collections\ReorderCollectionsAction;
 use App\Http\Requests\AddPaperToCollectionRequest;
+use App\Http\Requests\ReorderCollectionsRequest;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Models\Collection;
@@ -47,6 +49,18 @@ class CollectionController extends Controller
         $this->authorize('update', $collection);
 
         $collection->update($request->validated());
+
+        return to_route('projects.show', $project);
+    }
+
+    /**
+     * Reorder the project's collections.
+     */
+    public function reorder(ReorderCollectionsRequest $request, Project $project, ReorderCollectionsAction $action): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $action->handle($project, $request->validated('collection_ids'));
 
         return to_route('projects.show', $project);
     }
