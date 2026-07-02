@@ -81,6 +81,51 @@ test('user cannot post chat to another users project', function () {
         ->assertForbidden();
 });
 
+test('records an llm_calls row for a synthesis', function () {
+    config([
+        'services.openrouter.model' => 'qwen/test-model',
+        'services.openrouter.base_url' => 'https://openrouter.ai/api/v1',
+    ]);
+
+    Http::fake([
+        'openrouter.ai/api/v1/chat/completions' => Http::response([
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => 'A helpful answer.',
+                    ],
+                ],
+            ],
+            'usage' => [
+                'prompt_tokens' => 100,
+                'completion_tokens' => 50,
+                'cost' => 0.00015,
+            ],
+        ], 200),
+    ]);
+
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->post(route('chat.store', $project), [
+            'question' => 'What does this paper conclude?',
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('llm_calls', [
+        'user_id' => $user->id,
+        'model' => 'qwen/test-model',
+        'context_type' => 'synthesis',
+        'prompt_tokens' => 100,
+        'completion_tokens' => 50,
+        'cost_usd' => '0.000150',
+        'status' => 'success',
+    ]);
+
+    $this->assertDatabaseCount('llm_calls', 1);
+});
+
 test('timeout shows user friendly error message', function () {
     Http::fake(function () {
         throw new ConnectionException('cURL error 28');

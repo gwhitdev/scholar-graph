@@ -37,20 +37,26 @@ class EnrichPaperJob implements ShouldQueue
         }
 
         $s2Data = $this->paper->doi
-            ? $semanticScholar->enrich($this->paper->doi)
+            ? $semanticScholar->enrich($this->paper->doi, $this->paper->project->user)
             : null;
 
         $tldr = $s2Data['tldr'] ?? null;
         $tldrSource = $tldr !== null ? 'semantic_scholar' : null;
 
         if ($tldr === null) {
+            // If the paper has no abstract but S2 provides one, use it for
+            // the LLM fallback so we can still generate a summary.
+            if (! $this->paper->abstract && ! empty($s2Data['abstract'])) {
+                $this->paper->abstract = $s2Data['abstract'];
+            }
+
             $tldr = $generateSummary->handle($this->paper);
             $tldrSource = $tldr !== null ? 'generated' : null;
         }
 
         // Nothing to store and S2 may recover: retry later. Without a DOI
         // there is nothing left to wait for, so give up quietly.
-        if ($tldr === null && $s2Data === null) {
+        if ($tldr === null) {
             if ($this->paper->doi) {
                 $this->release(300);
             }

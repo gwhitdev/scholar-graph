@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Usage\LogLlmCallAction;
 use App\Enums\MessageRole;
 use App\Models\ChatMessage;
 use App\Models\Paper;
@@ -15,7 +16,7 @@ test('build context returns papers and messages', function () {
     Paper::factory()->for($project)->count(2)->create();
     ChatMessage::factory()->for($project)->count(3)->create();
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $context = $service->buildContext($project);
 
     expect($context['papers'])->toHaveCount(2);
@@ -29,7 +30,7 @@ test('build prompt messages contains system papers and user question', function 
         'abstract' => 'Sample abstract',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $messages = $service->buildPromptMessages($project, 'What is this about?');
 
     expect($messages[0]['role'])->toBe('system');
@@ -50,7 +51,7 @@ test('build prompt includes authors year and doi from flat columns', function ()
         'doi' => '10.1037/0003-066X.55.1.5',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $messages = $service->buildPromptMessages($project, 'Summarise this.');
 
     $systemContent = $messages[0]['content'];
@@ -69,7 +70,7 @@ test('build prompt omits missing metadata gracefully', function () {
         'doi' => null,
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $messages = $service->buildPromptMessages($project, 'What?');
 
     $systemContent = $messages[0]['content'];
@@ -83,7 +84,7 @@ test('build prompt omits missing metadata gracefully', function () {
 test('build prompt uses fallback system prompt when no papers exist', function () {
     $project = Project::factory()->create();
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $messages = $service->buildPromptMessages($project, 'What is psychology?');
 
     expect($messages[0]['content'])->toContain('No papers are available');
@@ -98,7 +99,7 @@ test('resolve system prompt uses global prompt when enabled', function () {
         'system_prompt' => null,
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('You are a global research assistant.');
@@ -114,7 +115,7 @@ test('resolve system prompt uses project prompt when global disabled', function 
         'system_prompt' => 'You are a project-specific assistant.',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('You are a project-specific assistant.');
@@ -130,7 +131,7 @@ test('resolve system prompt composes both global and project prompts', function 
         'system_prompt' => 'Focus on machine learning papers.',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('You are a global research assistant.');
@@ -146,7 +147,7 @@ test('resolve system prompt appends negative prompt', function () {
         'negative_prompt' => 'Do not include a references section.',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('Do NOT');
@@ -163,7 +164,7 @@ test('resolve system prompt uses only project negative prompt when global disabl
         'negative_prompt' => 'Do not include a references section.',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('Do NOT');
@@ -178,7 +179,7 @@ test('resolve system prompt uses default when no custom prompts set', function (
         'system_prompt' => null,
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, 'Some paper context');
 
     expect($resolved)->toContain('precise, scholarly research assistant');
@@ -193,7 +194,7 @@ test('resolve system prompt handles no papers with custom prompt', function () {
         'use_global_prompt' => true,
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'model'), new LogLlmCallAction);
     $resolved = $service->resolveSystemPrompt($project, '');
 
     expect($resolved)->toContain('Custom instructions here.');
@@ -219,7 +220,7 @@ test('synthesise creates records and calls openrouter', function () {
     $project = Project::factory()->for($user)->create();
     $paper = Paper::factory()->for($project)->create();
 
-    $service = new SynthesisService(new OpenRouterService('key', 'qwen/test-model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'qwen/test-model'), new LogLlmCallAction);
     $synthesis = $service->synthesise($project, 'Summarise this paper.');
 
     expect($synthesis)->toBeInstanceOf(Synthesis::class);
@@ -259,7 +260,7 @@ test('synthesise includes chat history in prompt', function () {
         'content' => 'Previous answer',
     ]);
 
-    $service = new SynthesisService(new OpenRouterService('key', 'qwen/test-model'));
+    $service = new SynthesisService(new OpenRouterService('key', 'qwen/test-model'), new LogLlmCallAction);
     $service->synthesise($project, 'Follow-up question');
 
     Http::assertSent(function ($request) {
