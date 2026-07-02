@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Actions\Papers\GeneratePaperSummaryAction;
 use App\Models\Paper;
+use App\Models\User;
 use App\Services\SemanticScholarService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -21,6 +22,7 @@ class EnrichPaperJob implements ShouldQueue
 
     public function __construct(
         public Paper $paper,
+        public ?User $user = null,
     ) {}
 
     /**
@@ -37,7 +39,7 @@ class EnrichPaperJob implements ShouldQueue
         }
 
         $s2Data = $this->paper->doi
-            ? $semanticScholar->enrich($this->paper->doi, $this->paper->project->user)
+            ? $semanticScholar->enrich($this->paper->doi, $this->user)
             : null;
 
         $tldr = $s2Data['tldr'] ?? null;
@@ -50,7 +52,7 @@ class EnrichPaperJob implements ShouldQueue
                 $this->paper->abstract = $s2Data['abstract'];
             }
 
-            $tldr = $generateSummary->handle($this->paper);
+            $tldr = $generateSummary->handle($this->paper, $this->user);
             $tldrSource = $tldr !== null ? 'generated' : null;
         }
 
