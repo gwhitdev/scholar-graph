@@ -8,6 +8,7 @@ use App\Jobs\EnrichPaperJob;
 use App\Models\Paper;
 use App\Models\Project;
 use App\Services\OpenAlexSearchService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,10 +23,16 @@ class PaperController extends Controller
     {
         abort_unless($project->user_id === $request->user()->id, 403);
 
-        $results = $this->openAlex->search(
-            $request->query('query', ''),
-            min((int) $request->query('limit', 10), 20)
-        );
+        try {
+            $results = $this->openAlex->search(
+                $request->query('query', ''),
+                min((int) $request->query('limit', 10), 20)
+            );
+        } catch (RequestException) {
+            return response()->json([
+                'error' => 'Paper search is temporarily unavailable. Please try again shortly.',
+            ], 503);
+        }
 
         return response()->json($results);
     }

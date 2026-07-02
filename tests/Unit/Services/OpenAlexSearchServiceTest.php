@@ -138,3 +138,29 @@ test('search sends mailto param for polite pool', function () {
             || str_contains($request->url(), 'mailto=test@example.com');
     });
 });
+
+test('search sends mailto in user agent header for polite pool', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response(['results' => [], 'meta' => ['count' => 0]], 200),
+    ]);
+
+    $service = new OpenAlexSearchService('https://api.openalex.org', 'test@example.com');
+    $service->search('test');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->header('User-Agent')[0] ?? '', 'mailto:test@example.com');
+    });
+});
+
+test('search omits mailto param when not configured', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response(['results' => [], 'meta' => ['count' => 0]], 200),
+    ]);
+
+    $service = new OpenAlexSearchService('https://api.openalex.org', '');
+    $service->search('test');
+
+    Http::assertSent(function ($request) {
+        return ! str_contains($request->url(), 'mailto');
+    });
+});

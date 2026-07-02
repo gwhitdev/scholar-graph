@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -28,13 +29,12 @@ class OpenAlexSearchService
         $cacheKey = "openalex:search:{$query}:{$limit}:{$page}";
 
         return Cache::remember($cacheKey, self::SEARCH_TTL, function () use ($query, $limit, $page) {
-            $response = Http::timeout(30)
-                ->get($this->baseUrl.'/works', [
+            $response = $this->request()
+                ->get($this->baseUrl.'/works', array_merge([
                     'search' => $query,
                     'per_page' => $limit,
                     'page' => $page,
-                    'mailto' => $this->mailto,
-                ]);
+                ], $this->mailtoParam()));
 
             $response->throw();
 
@@ -57,10 +57,8 @@ class OpenAlexSearchService
         $cacheKey = "openalex:work:{$openAlexId}";
 
         return Cache::remember($cacheKey, self::WORK_TTL, function () use ($openAlexId) {
-            $response = Http::timeout(30)
-                ->get($this->baseUrl.'/works/'.$openAlexId, [
-                    'mailto' => $this->mailto,
-                ]);
+            $response = $this->request()
+                ->get($this->baseUrl.'/works/'.$openAlexId, $this->mailtoParam());
 
             $response->throw();
 
@@ -89,6 +87,33 @@ class OpenAlexSearchService
         ksort($wordsByPosition);
 
         return implode(' ', $wordsByPosition);
+    }
+
+    /**
+     * Build the base HTTP request, identifying the app for OpenAlex's polite
+     * pool via the User-Agent header when a mailto address is configured.
+     */
+    protected function request(): PendingRequest
+    {
+        $request = Http::timeout(30);
+
+        if ($this->mailto !== '') {
+            $request = $request->withHeaders([
+                'User-Agent' => "ScholarGraph (mailto:{$this->mailto})",
+            ]);
+        }
+
+        return $request;
+    }
+
+    /**
+     * The mailto query parameter for the polite pool, omitted when unset.
+     *
+     * @return array<string, string>
+     */
+    protected function mailtoParam(): array
+    {
+        return $this->mailto !== '' ? ['mailto' => $this->mailto] : [];
     }
 
     /**

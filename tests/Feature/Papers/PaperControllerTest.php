@@ -54,6 +54,23 @@ test('user can search papers', function () {
         ]);
 });
 
+test('search returns friendly error when openalex is unavailable', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response([
+            'error' => 'Search temporarily unavailable',
+            'message' => 'Anonymous search is temporarily unavailable.',
+        ], 503),
+    ]);
+
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->getJson(route('papers.search', ['project' => $project, 'query' => 'test']))
+        ->assertStatus(503)
+        ->assertJson(['error' => 'Paper search is temporarily unavailable. Please try again shortly.']);
+});
+
 test('user can add a paper to own project', function () {
     Queue::fake();
 
