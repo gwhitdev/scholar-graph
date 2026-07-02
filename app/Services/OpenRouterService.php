@@ -12,6 +12,7 @@ class OpenRouterService
     public function __construct(
         protected string $apiKey,
         protected string $model,
+        protected string $baseUrl = 'https://openrouter.ai/api/v1',
     ) {}
 
     /**
@@ -26,7 +27,7 @@ class OpenRouterService
             $response = Http::withToken($this->apiKey)
                 ->timeout(30)
                 ->retry(1, 500)
-                ->post('https://openrouter.ai/api/v1/chat/completions', [
+                ->post($this->baseUrl.'/chat/completions', [
                     'model' => $model ?? $this->model,
                     'messages' => $messages,
                 ]);

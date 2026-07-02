@@ -41,14 +41,18 @@ class ProjectController extends Controller
     {
         abort_unless($project->user_id === $request->user()->id, 403);
 
+        $project->load('user');
+
         return Inertia::render('projects/show', [
             'project' => $project,
-            'papers' => $project->papers()->latest('added_at')->get(),
+            'papers' => $project->papers()->with('enrichment')->latest('added_at')->get(),
             'chatMessages' => $project->chatMessages()
                 ->with('synthesis')
                 ->oldest()
                 ->get(),
             'syntheses' => $project->syntheses()->latest()->get(),
+            'globalSystemPrompt' => $request->user()->global_system_prompt,
+            'globalNegativePrompt' => $request->user()->global_negative_prompt,
         ]);
     }
 

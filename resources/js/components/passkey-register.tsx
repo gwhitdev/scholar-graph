@@ -11,6 +11,11 @@ type Props = {
 
 export default function PasskeyRegistration({ onSuccess }: Props) {
     const [name, setName] = useState(() => {
+        // navigator does not exist during SSR; the initializer re-runs in the browser on hydration
+        if (typeof navigator === 'undefined') {
+            return '';
+        }
+
         const ua = navigator.userAgent;
 
         const browser = [

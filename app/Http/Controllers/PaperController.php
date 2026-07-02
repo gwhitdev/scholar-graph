@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Papers\SavePaperToProjectAction;
-use App\Exceptions\SemanticScholarRateLimitException;
 use App\Http\Requests\StorePaperRequest;
+use App\Jobs\EnrichPaperJob;
 use App\Models\Paper;
 use App\Models\Project;
-use App\Services\SemanticScholarService;
+use App\Services\OpenAlexSearchService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ use Illuminate\Http\Request;
 class PaperController extends Controller
 {
     public function __construct(
-        protected SemanticScholarService $semanticScholar,
+        protected OpenAlexSearchService $openAlex,
     ) {}
 
     public function search(Request $request, Project $project): JsonResponse
@@ -23,14 +24,14 @@ class PaperController extends Controller
         abort_unless($project->user_id === $request->user()->id, 403);
 
         try {
-            $results = $this->semanticScholar->search(
+            $results = $this->openAlex->search(
                 $request->query('query', ''),
                 min((int) $request->query('limit', 10), 20)
             );
-        } catch (SemanticScholarRateLimitException) {
+        } catch (RequestException) {
             return response()->json([
-                'error' => 'Search limit reached. Please try again in a few minutes.',
-            ], 429);
+                'error' => 'Paper search is temporarily unavailable. Please try again shortly.',
+            ], 503);
         }
 
         return response()->json($results);
@@ -43,6 +44,16 @@ class PaperController extends Controller
         $action->handle($project, $request->validated());
 
         return redirect()->back();
+    }
+
+    public function enrich(Request $request, Project $project, Paper $paper): JsonResponse
+    {
+        abort_unless($project->user_id === $request->user()->id, 403);
+        abort_unless($paper->project_id === $project->id, 403);
+
+        EnrichPaperJob::dispatch($paper);
+
+        return response()->json(['message' => 'Enrichment queued.'], 202);
     }
 
     public function destroy(Request $request, Project $project, Paper $paper): RedirectResponse

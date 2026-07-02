@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\OpenAlexSearchService;
 use App\Services\OpenRouterService;
 use App\Services\SemanticScholarService;
 use Carbon\CarbonImmutable;
@@ -25,10 +26,19 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(OpenAlexSearchService::class, function () {
+            return new OpenAlexSearchService(
+                config('services.openalex.base_url') ?? 'https://api.openalex.org',
+                config('services.openalex.mailto') ?? '',
+                config('services.openalex.api_key') ?? '',
+            );
+        });
+
         $this->app->singleton(OpenRouterService::class, function () {
             return new OpenRouterService(
                 config('services.openrouter.key') ?? '',
-                config('services.openrouter.model') ?? 'qwen/qwen2.5-72b-instruct',
+                config('services.openrouter.model') ?? 'qwen-plus',
+                config('services.openrouter.base_url') ?? 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
             );
         });
     }

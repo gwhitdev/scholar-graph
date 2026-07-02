@@ -13,7 +13,10 @@ test('guest cannot post chat message', function () {
 });
 
 test('user can ask a question and synthesis is stored', function () {
-    config(['services.openrouter.model' => 'qwen/test-model']);
+    config([
+        'services.openrouter.model' => 'qwen/test-model',
+        'services.openrouter.base_url' => 'https://openrouter.ai/api/v1',
+    ]);
 
     Http::fake([
         'openrouter.ai/api/v1/chat/completions' => Http::response([

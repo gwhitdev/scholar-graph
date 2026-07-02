@@ -6,6 +6,7 @@ use Database\Factories\PaperFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Paper extends Model
 {
@@ -19,11 +20,16 @@ class Paper extends Model
      */
     protected $fillable = [
         'project_id',
-        'semantic_scholar_id',
+        'openalex_id',
         'title',
         'abstract',
         'year',
-        'raw_metadata',
+        'authors',
+        'doi',
+        'venue',
+        'pages',
+        'cited_by_count',
+        'referenced_works',
         'added_at',
     ];
 
@@ -35,7 +41,8 @@ class Paper extends Model
     protected function casts(): array
     {
         return [
-            'raw_metadata' => 'array',
+            'authors' => 'array',
+            'referenced_works' => 'array',
             'added_at' => 'datetime',
         ];
     }
@@ -46,5 +53,13 @@ class Paper extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * @return HasOne<PaperEnrichment, $this>
+     */
+    public function enrichment(): HasOne
+    {
+        return $this->hasOne(PaperEnrichment::class);
     }
 }

@@ -20,7 +20,22 @@ class Project extends Model
      */
     protected $fillable = [
         'name',
+        'system_prompt',
+        'use_global_prompt',
+        'negative_prompt',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'use_global_prompt' => 'boolean',
+        ];
+    }
 
     /**
      * @return BelongsTo<User, $this>

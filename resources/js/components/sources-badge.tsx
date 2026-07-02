@@ -4,6 +4,9 @@ import { Badge } from '@/components/ui/badge';
 interface Paper {
     id: number;
     title: string;
+    authors: string[] | null;
+    doi: string | null;
+    venue: string | null;
 }
 
 interface SourcesBadgeProps {

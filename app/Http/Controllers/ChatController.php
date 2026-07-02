@@ -24,6 +24,7 @@ class ChatController extends Controller
                 'message' => 'The model took too long to respond. Please try again.',
             ]);
         } catch (OpenRouterException $e) {
+            report($e);
             Inertia::flash('toast', [
                 'type' => 'error',
                 'message' => 'The model failed to respond. Please try again.',

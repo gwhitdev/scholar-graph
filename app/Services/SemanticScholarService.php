@@ -2,79 +2,94 @@
 
 namespace App\Services;
 
-use App\Exceptions\SemanticScholarRateLimitException;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class SemanticScholarService
 {
+    /** Cache TTL for enrichment and recommendation lookups: 24 hours. */
+    protected const ENRICH_TTL = 86400;
+
     public function __construct(
         protected string $baseUrl,
     ) {}
 
     /**
-     * Search for papers.
+     * Fetch enrichment data (TLDR + influential citation count) for a DOI.
      *
-     * @return array<int, array{semantic_scholar_id: string|null, title: string, abstract: string|null, year: int|null, raw_metadata: array<string, mixed>}>
+     * Returns null on any failure (including rate limits) so callers can
+     * retry later. Only successful results are cached; Cache::remember would
+     * cache the null and permanently block retries.
      *
-     * @throws SemanticScholarRateLimitException
+     * @return array{tldr: string|null, influential_citation_count: int|null}|null
      */
-    public function search(string $query, int $limit = 10): array
+    public function enrich(string $doi): ?array
     {
-        $response = Http::timeout(30)
-            ->get($this->baseUrl.'/graph/v1/paper/search', [
-                'query' => $query,
-                'fields' => 'title,abstract,year,externalIds',
-                'limit' => $limit,
-            ]);
+        $cacheKey = "semantic_scholar:enrich:{$doi}";
 
-        if ($response->status() === 429) {
-            throw new SemanticScholarRateLimitException('Semantic Scholar rate limit exceeded.');
+        $cached = Cache::get($cacheKey);
+
+        if ($cached !== null) {
+            return $cached;
         }
 
-        $response->throw();
+        try {
+            $response = Http::timeout(30)
+                ->get($this->baseUrl.'/graph/v1/paper/DOI:'.$doi, [
+                    'fields' => 'tldr,influentialCitationCount',
+                ]);
+        } catch (ConnectionException) {
+            return null;
+        }
 
-        /** @var array<int, array<string, mixed>> $papers */
-        $papers = $response->json('data', []);
+        if ($response->failed()) {
+            return null;
+        }
 
-        return collect($papers)
-            ->map(fn (array $paper) => [
-                'semantic_scholar_id' => $paper['paperId'] ?? null,
-                'title' => $paper['title'] ?? 'Untitled',
-                'abstract' => $paper['abstract'] ?? null,
-                'year' => $paper['year'] ?? null,
-                'raw_metadata' => $paper,
-            ])
-            ->all();
+        $result = [
+            'tldr' => $response->json('tldr.text'),
+            'influential_citation_count' => $response->json('influentialCitationCount'),
+        ];
+
+        Cache::put($cacheKey, $result, self::ENRICH_TTL);
+
+        return $result;
     }
 
     /**
-     * Fetch a single paper by ID.
+     * Fetch recommended papers related to a Semantic Scholar paper ID.
      *
-     * @return array{semantic_scholar_id: string|null, title: string, abstract: string|null, year: int|null, raw_metadata: array<string, mixed>}
-     *
-     * @throws SemanticScholarRateLimitException
+     * @return array<int, array{semantic_scholar_id: string|null, title: string, year: int|null, authors: list<string>}>
      */
-    public function fetchPaper(string $semanticScholarId): array
+    public function getRelatedPapers(string $semanticScholarId, int $limit = 5): array
     {
-        $response = Http::timeout(30)
-            ->get($this->baseUrl.'/graph/v1/paper/'.$semanticScholarId, [
-                'fields' => 'title,abstract,year,externalIds',
-            ]);
+        $cacheKey = "semantic_scholar:related:{$semanticScholarId}:{$limit}";
 
-        if ($response->status() === 429) {
-            throw new SemanticScholarRateLimitException('Semantic Scholar rate limit exceeded.');
-        }
+        return Cache::remember($cacheKey, self::ENRICH_TTL, function () use ($semanticScholarId, $limit) {
+            $response = Http::timeout(30)
+                ->get($this->baseUrl.'/graph/v1/paper/'.$semanticScholarId.'/recommendations', [
+                    'fields' => 'title,year,authors',
+                    'limit' => $limit,
+                ]);
 
-        $response->throw();
+            $response->throw();
 
-        $paper = $response->json();
+            /** @var array<int, array<string, mixed>> $papers */
+            $papers = $response->json('recommendedPapers', []);
 
-        return [
-            'semantic_scholar_id' => $paper['paperId'] ?? null,
-            'title' => $paper['title'] ?? 'Untitled',
-            'abstract' => $paper['abstract'] ?? null,
-            'year' => $paper['year'] ?? null,
-            'raw_metadata' => $paper,
-        ];
+            return collect($papers)
+                ->map(fn (array $paper): array => [
+                    'semantic_scholar_id' => $paper['paperId'] ?? null,
+                    'title' => $paper['title'] ?? 'Untitled',
+                    'year' => $paper['year'] ?? null,
+                    'authors' => collect($paper['authors'] ?? [])
+                        ->pluck('name')
+                        ->filter()
+                        ->values()
+                        ->all(),
+                ])
+                ->all();
+        });
     }
 }

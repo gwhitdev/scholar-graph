@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\PromptSettingsController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    Route::get('settings/prompt', [PromptSettingsController::class, 'edit'])->name('prompt.edit');
+    Route::put('settings/prompt', [PromptSettingsController::class, 'update'])->name('prompt.update');
 });
 
 Route::get('.well-known/passkey-endpoints', function () {
