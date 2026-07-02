@@ -43,7 +43,7 @@ GUIDELINES;
     public function buildContext(Project $project): array
     {
         return [
-            'papers' => $project->papers()->latest('added_at')->get(),
+            'papers' => $project->papers()->latest('project_papers.added_at')->get(),
             'messages' => $project->chatMessages()->oldest()->limit(20)->get(),
         ];
     }

@@ -1,21 +1,42 @@
 <?php
 
+use App\Enums\PaperStatus;
 use App\Models\Paper;
 use App\Models\PaperEnrichment;
 use App\Models\Project;
+use App\Models\User;
 
-test('paper belongs to a project', function () {
+test('paper belongs to many projects', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
     $paper = Paper::factory()->create();
 
-    expect($paper->project)->toBeInstanceOf(Project::class);
+    $project->papers()->attach($paper, [
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
+
+    expect($paper->projects->first()->id)->toBe($project->id);
 });
 
-test('deleting a project cascades to its papers', function () {
-    $project = Project::factory()->has(Paper::factory()->count(3))->create();
+test('deleting a project detaches its papers but keeps canonical papers', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+    $papers = Paper::factory()->count(3)->create();
+
+    foreach ($papers as $paper) {
+        $project->papers()->attach($paper, [
+            'user_id' => $user->id,
+            'status' => PaperStatus::Unread->value,
+            'added_at' => now(),
+        ]);
+    }
 
     $project->delete();
 
-    expect(Paper::count())->toBe(0);
+    expect(Paper::count())->toBe(3);
+    $this->assertDatabaseCount('project_papers', 0);
 });
 
 test('paper has openalex fields in fillable', function () {
@@ -27,7 +48,7 @@ test('paper has openalex fields in fillable', function () {
 test('paper does not have removed fields in fillable', function () {
     $paper = new Paper;
 
-    expect($paper->getFillable())->not->toContain('raw_metadata', 'semantic_scholar_id');
+    expect($paper->getFillable())->not->toContain('raw_metadata', 'semantic_scholar_id', 'project_id', 'added_at');
 });
 
 test('referenced_works casts to array', function () {

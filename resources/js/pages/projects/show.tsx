@@ -2,6 +2,8 @@ import { Head } from '@inertiajs/react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import { ChatInput } from '@/components/chat-input';
 import { ChatThread } from '@/components/chat-thread';
+import { CollectionsList  } from '@/components/CollectionsList';
+import type {CollectionColor} from '@/components/CollectionsList';
 import { PaperCard } from '@/components/paper-card';
 import { PaperSearch } from '@/components/paper-search';
 import { PromptDrawer } from '@/components/prompt-drawer';
@@ -17,6 +19,10 @@ interface Paper {
     venue: string | null;
     pages: string | null;
     cited_by_count: number | null;
+    pivot: {
+        status: string;
+        added_at: string;
+    };
     enrichment?: {
         tldr: string | null;
         tldr_source: 'semantic_scholar' | 'generated' | null;
@@ -43,6 +49,13 @@ interface Synthesis {
     created_at: string;
 }
 
+interface Collection {
+    id: number;
+    name: string;
+    color: CollectionColor;
+    papers: { id: number }[];
+}
+
 interface Project {
     id: number;
     name: string;
@@ -54,8 +67,11 @@ interface Project {
 interface Props {
     project: Project;
     papers: Paper[];
+    savedOpenAlexIds: string[];
     chatMessages: ChatMessage[];
     syntheses: Synthesis[];
+    collections: Collection[];
+    collectionColors: CollectionColor[];
     globalSystemPrompt: string | null;
     globalNegativePrompt: string | null;
 }
@@ -63,7 +79,10 @@ interface Props {
 export default function ProjectsShow({
     project,
     papers,
+    savedOpenAlexIds,
     chatMessages,
+    collections,
+    collectionColors,
     globalSystemPrompt,
     globalNegativePrompt,
 }: Props) {
@@ -85,7 +104,10 @@ export default function ProjectsShow({
 
                 <div className="grid min-h-0 flex-1 gap-4 md:grid-cols-2">
                     <div className="flex min-h-0 flex-col gap-4">
-                        <PaperSearch projectId={project.id} />
+                        <PaperSearch
+                            projectId={project.id}
+                            savedOpenAlexIds={savedOpenAlexIds}
+                        />
 
                         <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-sidebar-border/70 p-4 dark:border-sidebar-border">
                             <h2 className="text-sm font-medium">
@@ -102,10 +124,17 @@ export default function ProjectsShow({
                                         key={paper.id}
                                         projectId={project.id}
                                         paper={paper}
+                                        collections={collections}
                                     />
                                 ))
                             )}
                         </div>
+
+                        <CollectionsList
+                            projectId={project.id}
+                            collections={collections}
+                            collectionColors={collectionColors}
+                        />
                     </div>
 
                     <div className="flex min-h-0 flex-col gap-4">
