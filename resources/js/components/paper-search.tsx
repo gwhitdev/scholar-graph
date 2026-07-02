@@ -2,7 +2,6 @@ import { Form } from '@inertiajs/react';
 import { SearchIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { search, store } from '@/actions/App/Http/Controllers/PaperController';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -15,14 +14,15 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 
 interface PaperResult {
-    semantic_scholar_id: string | null;
+    openalex_id: string | null;
     title: string;
     abstract: string | null;
     year: number | null;
     authors: string[];
     doi: string | null;
     venue: string | null;
-    pages: string | null;
+    cited_by_count: number | null;
+    referenced_works: string[];
 }
 
 interface PaperSearchProps {
@@ -41,7 +41,6 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<PaperResult[]>([]);
     const [hasSearched, setHasSearched] = useState(false);
-    const [rateLimited, setRateLimited] = useState(false);
     const [loading, setLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -53,7 +52,6 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
             if (searchQuery.trim().length < 3) {
                 setResults([]);
                 setHasSearched(false);
-                setRateLimited(false);
 
                 return;
             }
@@ -69,14 +67,6 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                     headers: { Accept: 'application/json' },
                 });
 
-                if (response.status === 429) {
-                    setResults([]);
-                    setHasSearched(true);
-                    setRateLimited(true);
-
-                    return;
-                }
-
                 if (!response.ok) {
                     setResults([]);
                     setHasSearched(true);
@@ -87,7 +77,6 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                 const papers: PaperResult[] = await response.json();
                 setResults(Array.isArray(papers) ? papers : []);
                 setHasSearched(true);
-                setRateLimited(false);
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     return;
@@ -121,8 +110,7 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                     Search Papers
                 </CardTitle>
                 <CardDescription>
-                    Find papers on Semantic Scholar and add them to your
-                    project.
+                    Find papers via OpenAlex and add them to your project.
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-1 flex-col gap-4">
@@ -141,16 +129,6 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                     )}
                 </div>
 
-                {rateLimited && (
-                    <Alert variant="destructive">
-                        <AlertTitle>Search limit reached</AlertTitle>
-                        <AlertDescription>
-                            Semantic Scholar is rate limiting your requests.
-                            Please wait a moment and try again.
-                        </AlertDescription>
-                    </Alert>
-                )}
-
                 <div className="flex flex-1 flex-col gap-2 overflow-y-auto">
                     {hasSearched && results.length === 0 && !loading && (
                         <p className="text-sm text-muted-foreground">
@@ -160,7 +138,7 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
 
                     {results.map((paper) => (
                         <div
-                            key={paper.semantic_scholar_id ?? paper.title}
+                            key={paper.openalex_id ?? paper.title}
                             className="rounded-lg border p-3 transition-colors hover:bg-accent/50"
                         >
                             <div className="flex items-start justify-between gap-2">
@@ -185,8 +163,11 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                                 DOI: {paper.doi}
                                             </a>
                                         )}
-                                        {paper.pages && (
-                                            <span>pp. {paper.pages}</span>
+                                        {paper.cited_by_count !== null && (
+                                            <span>
+                                                {paper.cited_by_count.toLocaleString()}{' '}
+                                                citations
+                                            </span>
                                         )}
                                     </div>
                                     {paper.authors.length > 0 && (
@@ -222,8 +203,8 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                     />
                                     <input
                                         type="hidden"
-                                        name="semantic_scholar_id"
-                                        value={paper.semantic_scholar_id ?? ''}
+                                        name="openalex_id"
+                                        value={paper.openalex_id ?? ''}
                                     />
                                     <input
                                         type="hidden"
@@ -237,8 +218,8 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                     />
                                     <input
                                         type="hidden"
-                                        name="pages"
-                                        value={paper.pages ?? ''}
+                                        name="cited_by_count"
+                                        value={paper.cited_by_count ?? ''}
                                     />
                                     {paper.authors.map((author, idx) => (
                                         <input
@@ -246,6 +227,14 @@ export function PaperSearch({ projectId }: PaperSearchProps) {
                                             type="hidden"
                                             name={`authors[${idx}]`}
                                             value={author}
+                                        />
+                                    ))}
+                                    {paper.referenced_works.map((work, idx) => (
+                                        <input
+                                            key={idx}
+                                            type="hidden"
+                                            name={`referenced_works[${idx}]`}
+                                            value={work}
                                         />
                                     ))}
                                     <Button type="submit" size="sm">

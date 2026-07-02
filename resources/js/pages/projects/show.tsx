@@ -8,7 +8,7 @@ import { PromptDrawer } from '@/components/prompt-drawer';
 
 interface Paper {
     id: number;
-    semantic_scholar_id: string | null;
+    openalex_id: string | null;
     title: string;
     abstract: string | null;
     year: number | null;
@@ -16,6 +16,12 @@ interface Paper {
     doi: string | null;
     venue: string | null;
     pages: string | null;
+    cited_by_count: number | null;
+    enrichment?: {
+        tldr: string | null;
+        influential_citation_count: number | null;
+        enriched_at: string | null;
+    } | null;
 }
 
 interface ChatMessage {
