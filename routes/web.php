@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,8 @@ Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
 require __DIR__.'/settings.php';
 require __DIR__.'/projects.php';
 require __DIR__.'/admin.php';
+
+// Public CMS catch-all (MUST be last to avoid shadowing app routes)
+Route::get('/{slug}', [PublicPageController::class, 'show'])
+    ->where('slug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('public.page');
