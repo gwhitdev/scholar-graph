@@ -2,6 +2,8 @@ import { Head } from '@inertiajs/react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import { ChatInput } from '@/components/chat-input';
 import { ChatThread } from '@/components/chat-thread';
+import { CollectionsList  } from '@/components/CollectionsList';
+import type {CollectionColor} from '@/components/CollectionsList';
 import { PaperCard } from '@/components/paper-card';
 import { PaperSearch } from '@/components/paper-search';
 import { PromptDrawer } from '@/components/prompt-drawer';
@@ -47,6 +49,13 @@ interface Synthesis {
     created_at: string;
 }
 
+interface Collection {
+    id: number;
+    name: string;
+    color: CollectionColor;
+    papers: { id: number }[];
+}
+
 interface Project {
     id: number;
     name: string;
@@ -61,6 +70,7 @@ interface Props {
     savedOpenAlexIds: string[];
     chatMessages: ChatMessage[];
     syntheses: Synthesis[];
+    collections: Collection[];
     globalSystemPrompt: string | null;
     globalNegativePrompt: string | null;
 }
@@ -70,6 +80,7 @@ export default function ProjectsShow({
     papers,
     savedOpenAlexIds,
     chatMessages,
+    collections,
     globalSystemPrompt,
     globalNegativePrompt,
 }: Props) {
@@ -111,10 +122,16 @@ export default function ProjectsShow({
                                         key={paper.id}
                                         projectId={project.id}
                                         paper={paper}
+                                        collections={collections}
                                     />
                                 ))
                             )}
                         </div>
+
+                        <CollectionsList
+                            projectId={project.id}
+                            collections={collections}
+                        />
                     </div>
 
                     <div className="flex min-h-0 flex-col gap-4">

@@ -258,7 +258,8 @@ export function PaperSearch({ projectId, savedOpenAlexIds }: PaperSearchProps) {
                                 </Form>
                             </div>
                         </div>
-                    )})}
+                    )
+})}
                 </div>
             </CardContent>
         </Card>

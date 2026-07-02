@@ -65,4 +65,12 @@ class Project extends Model
     {
         return $this->hasMany(ChatMessage::class);
     }
+
+    /**
+     * @return HasMany<Collection, $this>
+     */
+    public function collections(): HasMany
+    {
+        return $this->hasMany(Collection::class)->orderBy('position');
+    }
 }

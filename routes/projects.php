@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\PaperController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PromptController;
@@ -21,4 +22,11 @@ Route::middleware(['auth', 'verified'])->prefix('projects')->scopeBindings()->gr
     Route::post('/{project}/chat', [ChatController::class, 'store'])->name('chat.store');
 
     Route::put('/{project}/prompt', [PromptController::class, 'update'])->name('projects.prompt.update');
+
+    Route::get('/{project}/collections', [CollectionController::class, 'index'])->name('collections.index');
+    Route::post('/{project}/collections', [CollectionController::class, 'store'])->name('collections.store');
+    Route::patch('/{project}/collections/{collection}', [CollectionController::class, 'update'])->name('collections.update');
+    Route::delete('/{project}/collections/{collection}', [CollectionController::class, 'destroy'])->name('collections.destroy');
+    Route::post('/{project}/collections/{collection}/papers', [CollectionController::class, 'addPaper'])->name('collections.papers.add');
+    Route::delete('/{project}/collections/{collection}/papers/{paper}', [CollectionController::class, 'removePaper'])->name('collections.papers.remove');
 });

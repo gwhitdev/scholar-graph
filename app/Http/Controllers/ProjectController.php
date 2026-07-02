@@ -57,6 +57,7 @@ class ProjectController extends Controller
                 ->oldest()
                 ->get(),
             'syntheses' => $project->syntheses()->latest()->get(),
+            'collections' => $project->collections()->with('papers:id')->get(),
             'globalSystemPrompt' => $request->user()->global_system_prompt,
             'globalNegativePrompt' => $request->user()->global_negative_prompt,
         ]);
