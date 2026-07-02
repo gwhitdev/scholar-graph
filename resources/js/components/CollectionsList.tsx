@@ -51,6 +51,7 @@ interface Collection {
 interface CollectionsListProps {
     projectId: number;
     collections: Collection[];
+    collectionColors: CollectionColor[];
 }
 
 interface CollectionFormData {
@@ -67,7 +68,11 @@ function CollectionDot({ color }: { color: CollectionColor }) {
     );
 }
 
-export function CollectionsList({ projectId, collections }: CollectionsListProps) {
+export function CollectionsList({
+    projectId,
+    collections,
+    collectionColors,
+}: CollectionsListProps) {
     const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
 

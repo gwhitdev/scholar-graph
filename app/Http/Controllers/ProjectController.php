@@ -58,6 +58,7 @@ class ProjectController extends Controller
                 ->get(),
             'syntheses' => $project->syntheses()->latest()->get(),
             'collections' => $project->collections()->with('papers:id')->get(),
+            'collectionColors' => config('collections.colors'),
             'globalSystemPrompt' => $request->user()->global_system_prompt,
             'globalNegativePrompt' => $request->user()->global_negative_prompt,
         ]);

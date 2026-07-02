@@ -71,6 +71,7 @@ interface Props {
     chatMessages: ChatMessage[];
     syntheses: Synthesis[];
     collections: Collection[];
+    collectionColors: CollectionColor[];
     globalSystemPrompt: string | null;
     globalNegativePrompt: string | null;
 }
@@ -81,6 +82,7 @@ export default function ProjectsShow({
     savedOpenAlexIds,
     chatMessages,
     collections,
+    collectionColors,
     globalSystemPrompt,
     globalNegativePrompt,
 }: Props) {
@@ -131,6 +133,7 @@ export default function ProjectsShow({
                         <CollectionsList
                             projectId={project.id}
                             collections={collections}
+                            collectionColors={collectionColors}
                         />
                     </div>
 
