@@ -164,3 +164,52 @@ test('search omits mailto param when not configured', function () {
         return ! str_contains($request->url(), 'mailto');
     });
 });
+
+test('search sends api key param when configured', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response(['results' => [], 'meta' => ['count' => 0]], 200),
+    ]);
+
+    $service = new OpenAlexSearchService('https://api.openalex.org', 'test@example.com', 'secret-key');
+    $service->search('test');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api_key=secret-key');
+    });
+});
+
+test('getWork sends api key param when configured', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response([
+            'id' => 'https://openalex.org/W1',
+            'title' => 'Keyed Work',
+            'publication_year' => 2024,
+            'authorships' => [],
+            'primary_location' => null,
+            'abstract_inverted_index' => null,
+            'referenced_works' => [],
+            'cited_by_count' => 0,
+            'doi' => null,
+        ], 200),
+    ]);
+
+    $service = new OpenAlexSearchService('https://api.openalex.org', 'test@example.com', 'secret-key');
+    $service->getWork('W1');
+
+    Http::assertSent(function ($request) {
+        return str_contains($request->url(), 'api_key=secret-key');
+    });
+});
+
+test('search omits api key param when not configured', function () {
+    Http::fake([
+        'api.openalex.org/*' => Http::response(['results' => [], 'meta' => ['count' => 0]], 200),
+    ]);
+
+    $service = new OpenAlexSearchService('https://api.openalex.org', 'test@example.com');
+    $service->search('test');
+
+    Http::assertSent(function ($request) {
+        return ! str_contains($request->url(), 'api_key');
+    });
+});

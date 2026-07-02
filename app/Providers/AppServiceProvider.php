@@ -30,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
             return new OpenAlexSearchService(
                 config('services.openalex.base_url') ?? 'https://api.openalex.org',
                 config('services.openalex.mailto') ?? '',
+                config('services.openalex.api_key') ?? '',
             );
         });
 

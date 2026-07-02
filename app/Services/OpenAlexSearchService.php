@@ -17,6 +17,7 @@ class OpenAlexSearchService
     public function __construct(
         protected string $baseUrl,
         protected string $mailto,
+        protected string $apiKey = '',
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class OpenAlexSearchService
                     'search' => $query,
                     'per_page' => $limit,
                     'page' => $page,
-                ], $this->mailtoParam()));
+                ], $this->identityParams()));
 
             $response->throw();
 
@@ -58,7 +59,7 @@ class OpenAlexSearchService
 
         return Cache::remember($cacheKey, self::WORK_TTL, function () use ($openAlexId) {
             $response = $this->request()
-                ->get($this->baseUrl.'/works/'.$openAlexId, $this->mailtoParam());
+                ->get($this->baseUrl.'/works/'.$openAlexId, $this->identityParams());
 
             $response->throw();
 
@@ -107,13 +108,17 @@ class OpenAlexSearchService
     }
 
     /**
-     * The mailto query parameter for the polite pool, omitted when unset.
+     * Identification query parameters (polite-pool mailto and API key),
+     * each omitted when unset.
      *
      * @return array<string, string>
      */
-    protected function mailtoParam(): array
+    protected function identityParams(): array
     {
-        return $this->mailto !== '' ? ['mailto' => $this->mailto] : [];
+        return array_filter([
+            'mailto' => $this->mailto,
+            'api_key' => $this->apiKey,
+        ], fn (string $value) => $value !== '');
     }
 
     /**
