@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Settings\BillingController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\PromptSettingsController;
 use App\Http\Controllers\Settings\SecurityController;
+use App\Http\Controllers\Settings\StripeCheckoutController;
 use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('settings/prompt', [PromptSettingsController::class, 'edit'])->name('prompt.edit');
     Route::put('settings/prompt', [PromptSettingsController::class, 'update'])->name('prompt.update');
+
+    Route::get('settings/billing', [BillingController::class, 'edit'])->name('billing.edit');
+    Route::post('settings/billing/redeem', [BillingController::class, 'redeem'])->name('billing.redeem');
+    Route::post('settings/billing/checkout', [StripeCheckoutController::class, 'create'])->name('billing.checkout');
 });
 
 Route::get('.well-known/passkey-endpoints', function () {

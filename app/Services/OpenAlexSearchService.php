@@ -92,6 +92,46 @@ class OpenAlexSearchService
     }
 
     /**
+     * Search for a work by DOI.
+     *
+     * @return array{openalex_id: string|null, doi: string|null, title: string, abstract: string|null, year: int|null, authors: list<string>, venue: string|null, cited_by_count: int|null, referenced_works: list<string>}|null
+     */
+    public function searchByDoi(string $doi, ?User $user = null): ?array
+    {
+        $cacheKey = "openalex:doi:{$doi}";
+
+        return Cache::remember($cacheKey, self::WORK_TTL, function () use ($doi, $user) {
+            $start = microtime(true);
+
+            $response = $this->request()
+                ->get($this->baseUrl.'/works', array_merge([
+                    'filter' => 'doi:'.$doi,
+                    'per_page' => 1,
+                ], $this->identityParams()));
+
+            $response->throw();
+
+            ApiUsageRecorder::record(
+                service: 'openalex',
+                endpoint: '/works',
+                status: $response->status(),
+                durationMs: (int) round((microtime(true) - $start) * 1000),
+                user: $user,
+                method: 'GET',
+            );
+
+            /** @var list<array<string, mixed>> $works */
+            $works = $response->json('results', []);
+
+            if (empty($works)) {
+                return null;
+            }
+
+            return $this->normalizeWork($works[0]);
+        });
+    }
+
+    /**
      * Reconstruct a plain-text abstract from an OpenAlex inverted index.
      *
      * The index maps each word to the list of positions it occupies, so the

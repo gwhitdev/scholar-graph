@@ -12,6 +12,8 @@
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
+    --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -139,5 +141,48 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+
+    html,
+    body {
+        overscroll-behavior: none;
+    }
+}
+
+/* Workspace (1a Herbarium) theme tokens */
+.workspace {
+    --ws-bg: oklch(0.955 0.012 95);
+    --ws-panel: oklch(0.99 0.005 95);
+    --ws-panel2: oklch(0.945 0.012 95);
+    --ws-fg: oklch(0.20 0.01 95);
+    --ws-muted: oklch(0.45 0.015 95);
+    --ws-faint: oklch(0.63 0.015 95);
+    --ws-line: oklch(0.90 0.012 95);
+    --ws-accent: oklch(0.55 0.08 130);
+    --ws-soft: oklch(0.93 0.02 130);
+    --ws-onacc: oklch(1 0 0);
+
+    background: var(--ws-bg);
+    color: var(--ws-fg);
+}
+
+.dark .workspace {
+    --ws-bg: oklch(0.18 0.01 95);
+    --ws-panel: oklch(0.22 0.01 95);
+    --ws-panel2: oklch(0.26 0.01 95);
+    --ws-fg: oklch(0.93 0.008 95);
+    --ws-muted: oklch(0.72 0.015 95);
+    --ws-faint: oklch(0.55 0.015 95);
+    --ws-line: oklch(0.32 0.01 95);
+    --ws-accent: oklch(0.65 0.08 130);
+    --ws-soft: oklch(0.28 0.02 130);
+    --ws-onacc: oklch(0.18 0.01 95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace,
+    .workspace * {
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
     }
 }

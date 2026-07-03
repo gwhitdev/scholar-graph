@@ -48,7 +48,7 @@ it('forbids adding a paper to another users project', function () {
 it('forbids enriching a paper in another users project', function () {
     $userA = User::factory()->create();
     $projectB = Project::factory()->create();
-    $paperB = Paper::factory()->for($projectB)->create();
+    $paperB = Paper::factory()->forProject($projectB)->create();
 
     $this->actingAs($userA)
         ->post(route('papers.enrich', [$projectB, $paperB]))
@@ -58,7 +58,7 @@ it('forbids enriching a paper in another users project', function () {
 it('forbids deleting a paper from another users project', function () {
     $userA = User::factory()->create();
     $projectB = Project::factory()->create();
-    $paperB = Paper::factory()->for($projectB)->create();
+    $paperB = Paper::factory()->forProject($projectB)->create();
 
     $this->actingAs($userA)
         ->delete(route('papers.destroy', [$projectB, $paperB]))
@@ -92,7 +92,7 @@ it('forbids updating the prompt of another users project', function () {
 
 it('returns 404 when a paper does not belong to the project in the url', function () {
     $projectX = Project::factory()->create();
-    $paperX = Paper::factory()->for($projectX)->create();
+    $paperX = Paper::factory()->forProject($projectX)->create();
     $projectY = Project::factory()->create();
 
     $this->actingAs($projectY->user)
@@ -105,7 +105,7 @@ it('lets the owner perform each action', function () {
 
     $userB = User::factory()->create();
     $projectB = Project::factory()->for($userB)->create();
-    $paperB = Paper::factory()->for($projectB)->create();
+    $paperB = Paper::factory()->forProject($projectB)->create();
 
     $this->actingAs($userB)
         ->get(route('projects.show', $projectB))
@@ -138,7 +138,7 @@ it('lets the owner perform each action', function () {
         ])
         ->assertRedirect();
 
-    $newPaper = Paper::factory()->for($projectB)->create();
+    $newPaper = Paper::factory()->forProject($projectB)->create();
     $this->actingAs($userB)
         ->delete(route('papers.destroy', [$projectB, $newPaper]))
         ->assertRedirect();

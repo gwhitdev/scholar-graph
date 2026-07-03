@@ -16,7 +16,10 @@ use Tests\TestCase;
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature')
+    ->beforeEach(function () {
+        $this->seed(\Database\Seeders\PlanSeeder::class);
+    });
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)

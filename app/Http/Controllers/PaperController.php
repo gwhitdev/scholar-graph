@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Papers\AddPaperByDoiAction;
 use App\Actions\Papers\SavePaperToProjectAction;
+use App\Http\Requests\StorePaperByDoiRequest;
 use App\Http\Requests\StorePaperRequest;
+use App\Http\Requests\UpdatePaperStatusRequest;
 use App\Jobs\EnrichPaperJob;
 use App\Models\Paper;
 use App\Models\Project;
@@ -56,20 +59,46 @@ class PaperController extends Controller
         return redirect()->back();
     }
 
+    public function storeByDoi(StorePaperByDoiRequest $request, Project $project, AddPaperByDoiAction $action): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        try {
+            $action->handle($project, $request->validated('doi'), $request->user());
+        } catch (\RuntimeException) {
+            return redirect()->back()->withErrors([
+                'doi' => 'Could not find a paper with that DOI. Please check and try again.',
+            ]);
+        }
+
+        return redirect()->back();
+    }
+
     public function enrich(Request $request, Project $project, Paper $paper): JsonResponse
     {
         $this->authorize('update', $project);
 
-        EnrichPaperJob::dispatch($paper);
+        EnrichPaperJob::dispatch($paper, $request->user());
 
         return response()->json(['message' => 'Enrichment queued.'], 202);
+    }
+
+    public function updateStatus(UpdatePaperStatusRequest $request, Project $project, Paper $paper): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $project->papers()->updateExistingPivot($paper->id, [
+            'status' => $request->validated('status'),
+        ]);
+
+        return redirect()->back();
     }
 
     public function destroy(Request $request, Project $project, Paper $paper): RedirectResponse
     {
         $this->authorize('update', $project);
 
-        $paper->delete();
+        $project->papers()->detach($paper->id);
 
         return redirect()->back();
     }

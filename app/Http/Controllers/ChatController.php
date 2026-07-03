@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\Syntheses\CreateSynthesisAction;
+use App\Exceptions\InsufficientCreditsException;
 use App\Exceptions\OpenRouterException;
 use App\Exceptions\OpenRouterTimeoutException;
 use App\Http\Requests\StoreChatMessageRequest;
@@ -18,6 +19,11 @@ class ChatController extends Controller
 
         try {
             $action->handle($project, $request->validated('question'));
+        } catch (InsufficientCreditsException) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Out of credits — upgrade or redeem a key.',
+            ]);
         } catch (OpenRouterTimeoutException) {
             Inertia::flash('toast', [
                 'type' => 'error',
