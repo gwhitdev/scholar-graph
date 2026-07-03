@@ -43,6 +43,9 @@ class HandleInertiaRequests extends Middleware
                 'is_admin' => $request->user()?->isAdmin() ?? false,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'allProjects' => $request->user()
+                ? $request->user()->projects()->latest()->get(['id', 'name'])->toArray()
+                : [],
         ];
     }
 }

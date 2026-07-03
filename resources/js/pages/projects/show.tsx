@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import { ChatInput } from '@/components/chat-input';
 import { ChatThread } from '@/components/chat-thread';
@@ -9,12 +9,9 @@ import {
     CommandBar,
     ContentHeader,
     DiscussionPanel,
-    IconRail,
     LibraryHeader,
-    ProjectSidebar,
     WorkspaceShell,
 } from '@/components/workspace';
-import type { PanelKey } from '@/components/workspace/IconRail';
 import { useState } from 'react';
 
 interface Paper {
@@ -73,11 +70,6 @@ interface Project {
     negative_prompt: string | null;
 }
 
-interface AllProject {
-    id: number;
-    name: string;
-}
-
 interface Props {
     project: Project;
     papers: Paper[];
@@ -94,7 +86,6 @@ interface Props {
     openalex: {
         corpusLabel: string;
     };
-    allProjects: AllProject[];
 }
 
 export default function ProjectsShow({
@@ -108,13 +99,10 @@ export default function ProjectsShow({
     globalNegativePrompt,
     assistant,
     openalex,
-    allProjects,
 }: Props) {
     const [promptDrawerOpen, setPromptDrawerOpen] = useState(false);
     const [sortBy, setSortBy] = useState('date');
-    const [activePanel, setActivePanel] = useState<PanelKey | null>(null);
     const [discussionExpanded, setDiscussionExpanded] = useState(false);
-    const appName = usePage().props.name as string ?? 'ScholarGraph';
 
     // Sort papers
     const sortedPapers = [...papers].sort((a, b) => {
@@ -132,41 +120,10 @@ export default function ProjectsShow({
     // Calculate total citations
     const totalCitations = papers.reduce((sum, p) => sum + (p.cited_by_count ?? 0), 0);
 
-    const handlePanelToggle = (panel: PanelKey) => {
-        setActivePanel((prev) => (prev === panel ? null : panel));
-    };
-
-    const handleFindPapers = () => {
-        // Focus the search input in the command bar
-        const searchInput = document.getElementById('command-bar-search');
-        searchInput?.focus();
-    };
-
     return (
         <>
             <Head title={project.name} />
             <WorkspaceShell
-                rail={
-                    <IconRail
-                        appName={appName}
-                        activePanel={activePanel}
-                        onPanelToggle={handlePanelToggle}
-                    />
-                }
-                sidebar={
-                    <ProjectSidebar
-                        projectName={project.name}
-                        projectId={project.id}
-                        allProjects={allProjects}
-                        collections={collections}
-                        collectionColors={collectionColors}
-                        onFindPapers={handleFindPapers}
-                        onEditPrompt={() => setPromptDrawerOpen(true)}
-                        onClose={() => setActivePanel(null)}
-                    />
-                }
-                sidebarOpen={activePanel !== null}
-                onSidebarClose={() => setActivePanel(null)}
                 library={
                     <>
                         <ContentHeader

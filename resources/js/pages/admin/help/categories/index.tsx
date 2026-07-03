@@ -29,7 +29,7 @@ export default function CategoriesIndex({ categories }: CategoriesIndexProps) {
                         <Button>New Category</Button>
                     </Link>
                 </div>
-                <p className="text-gray-500">{categories.length} category(ies)</p>
+                <p className="text-muted-foreground">{categories.length} category(ies)</p>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead className="border-b">

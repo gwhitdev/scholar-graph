@@ -26,7 +26,7 @@ export default function PagesIndex({ pages }: PagesIndexProps) {
             <AdminNav />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <h1 className="text-2xl font-bold">CMS Pages</h1>
-                <p className="text-gray-500">{pages.data.length} page(s)</p>
+                <p className="text-muted-foreground">{pages.data.length} page(s)</p>
             </div>
         </>
     );

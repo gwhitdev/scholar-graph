@@ -29,8 +29,8 @@ const typeColors: Record<string, string> = {
 const statusColors: Record<string, string> = {
     open: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
     in_progress: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
-    resolved: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-300 dark:border-gray-700',
-    closed: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-800/30 dark:text-gray-500 dark:border-gray-700',
+    resolved: 'bg-muted text-foreground border-border',
+    closed: 'bg-muted text-muted-foreground border-border',
 };
 
 const statusLabels: Record<string, string> = {

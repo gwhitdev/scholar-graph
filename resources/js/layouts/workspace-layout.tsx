@@ -1,3 +1,6 @@
+import { HoverableSidebar } from '@/components/hoverable-sidebar';
+import { AppShell } from '@/components/app-shell';
+import { ProjectDrawerProvider } from '@/components/project-drawer';
 import type { BreadcrumbItem } from '@/types';
 import type { ReactNode } from 'react';
 
@@ -7,5 +10,14 @@ interface WorkspaceLayoutProps {
 }
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
-    return <div className="fixed inset-0 flex overflow-hidden">{children}</div>;
+    return (
+        <ProjectDrawerProvider>
+            <AppShell>
+                <HoverableSidebar />
+                <div className="flex min-h-svh flex-1 flex-col overflow-hidden">
+                    {children}
+                </div>
+            </AppShell>
+        </ProjectDrawerProvider>
+    );
 }

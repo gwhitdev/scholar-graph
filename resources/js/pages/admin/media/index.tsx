@@ -25,7 +25,7 @@ export default function MediaIndex({ media }: MediaIndexProps) {
             <AdminNav />
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <h1 className="text-2xl font-bold">Media Library</h1>
-                <p className="text-gray-500">{media.data.length} file(s)</p>
+                <p className="text-muted-foreground">{media.data.length} file(s)</p>
             </div>
         </>
     );

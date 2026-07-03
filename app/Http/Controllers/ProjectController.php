@@ -67,7 +67,6 @@ class ProjectController extends Controller
             'openalex' => [
                 'corpusLabel' => config('services.openalex.corpus_label'),
             ],
-            'allProjects' => $request->user()->projects()->latest()->get(['id', 'name']),
         ]);
     }
 

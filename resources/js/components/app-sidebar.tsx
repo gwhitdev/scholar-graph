@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, FolderGit2, FolderOpen, HelpCircle, LayoutGrid, Shield, TicketIcon } from 'lucide-react';
-import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import AppLogo from '@/components/app-logo';
+import { useProjectDrawer } from '@/components/project-drawer';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -20,6 +20,7 @@ import type { NavItem } from '@/types';
 export function AppSidebar() {
     const { auth } = usePage().props;
     const isAdmin = auth.is_admin === true;
+    const { toggle: toggleProjectDrawer, close: closeProjectDrawer } = useProjectDrawer();
 
     const mainNavItems: NavItem[] = [
         {
@@ -29,8 +30,9 @@ export function AppSidebar() {
         },
         {
             title: 'Projects',
-            href: projectsIndex(),
+            href: '#',
             icon: FolderOpen,
+            onClick: toggleProjectDrawer,
         },
         {
             title: 'Support',
@@ -67,7 +69,7 @@ export function AppSidebar() {
     ];
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border bg-sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -81,7 +83,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={mainNavItems} closeDrawer={closeProjectDrawer} />
             </SidebarContent>
 
             <SidebarFooter>

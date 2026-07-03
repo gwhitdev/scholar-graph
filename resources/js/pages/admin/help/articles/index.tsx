@@ -30,7 +30,7 @@ export default function ArticlesIndex({ articles }: ArticlesIndexProps) {
                         <Button>New Article</Button>
                     </Link>
                 </div>
-                <p className="text-gray-500">{articles.length} article(s)</p>
+                <p className="text-muted-foreground">{articles.length} article(s)</p>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
                         <thead className="border-b">

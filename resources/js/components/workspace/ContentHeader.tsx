@@ -1,3 +1,5 @@
+import { SidebarTrigger } from '@/components/ui/sidebar';
+
 interface ContentHeaderProps {
     projectName: string;
     projectDescription?: string;
@@ -35,17 +37,20 @@ export function ContentHeader({
 
     return (
         <div className="shrink-0 px-8 pt-5">
-            {/* Top row: breadcrumb + edit prompt */}
+            {/* Top row: sidebar toggle + breadcrumb + edit prompt */}
             <div className="flex items-center justify-between">
-                <div
-                    className="flex items-center gap-2 text-[13px]"
-                    style={{ color: 'var(--ws-faint)' }}
-                >
-                    <span>Projects</span>
-                    <span style={{ opacity: 0.6 }}>/</span>
-                    <span style={{ color: 'var(--ws-muted)', fontWeight: 500 }}>
-                        {projectName}
-                    </span>
+                <div className="flex items-center gap-2">
+                    <SidebarTrigger className="-ml-1" />
+                    <div
+                        className="flex items-center gap-2 text-[13px]"
+                        style={{ color: 'var(--ws-faint)' }}
+                    >
+                        <span>Projects</span>
+                        <span style={{ opacity: 0.6 }}>/</span>
+                        <span style={{ color: 'var(--ws-muted)', fontWeight: 500 }}>
+                            {projectName}
+                        </span>
+                    </div>
                 </div>
                 <button
                     type="button"
