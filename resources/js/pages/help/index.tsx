@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import * as helpRoutes from '@/routes/help';
 
 interface Article {
     id: number;
@@ -29,7 +30,7 @@ export default function HelpIndex({ categories, articles, search }: HelpIndexPro
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.get(route('help.search'), { preserveState: true });
+        form.get(helpRoutes.search.url(), { preserveState: true });
     }
 
     const isSearching = search !== undefined && search !== '';
@@ -87,7 +88,7 @@ export default function HelpIndex({ categories, articles, search }: HelpIndexPro
                                 {articles.map((article) => (
                                     <li key={article.id}>
                                         <a
-                                            href={route('help.show', [article.help_category.slug, article.slug])}
+                                            href={helpRoutes.show.url({ category: article.help_category.slug, article: article.slug })}
                                             className="block rounded-lg border p-4 transition-colors hover:bg-muted"
                                         >
                                             <span className="font-medium">{article.title}</span>
@@ -113,7 +114,7 @@ export default function HelpIndex({ categories, articles, search }: HelpIndexPro
                                         {cat.articles.map((article) => (
                                             <li key={article.id}>
                                                 <a
-                                                    href={route('help.show', [cat.slug, article.slug])}
+                                                    href={helpRoutes.show.url({ category: cat.slug, article: article.slug })}
                                                     className="block rounded-lg border p-4 transition-colors hover:bg-muted"
                                                 >
                                                     {article.title}

@@ -3,6 +3,7 @@ import AdminNav from '@/components/admin-nav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as adminArticles from '@/routes/admin/help-articles';
 
 interface Category {
     id: number;
@@ -35,7 +36,7 @@ export default function EditArticle({ article, categories }: EditArticleProps) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.put(route('admin.help-articles.update', article.id));
+        form.put(adminArticles.update.url({ help_article: article.id }));
     }
 
     return (

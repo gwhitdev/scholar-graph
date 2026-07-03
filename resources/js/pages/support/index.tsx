@@ -3,6 +3,7 @@ import { PlusIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import * as supportTickets from '@/routes/support/tickets';
 
 interface Ticket {
     id: number;
@@ -59,7 +60,7 @@ export default function Index({ tickets, flash }: Props) {
                         </p>
                     </div>
                     <Button asChild>
-                        <Link href={route('support.tickets.create')}>
+                        <Link href={supportTickets.create.url()}>
                             <PlusIcon />
                             New Ticket
                         </Link>
@@ -77,7 +78,7 @@ export default function Index({ tickets, flash }: Props) {
                         <CardContent className="flex flex-col items-center py-12 text-center">
                             <p className="text-muted-foreground">No tickets yet.</p>
                             <Button className="mt-4" asChild>
-                                <Link href={route('support.tickets.create')}>Create your first ticket</Link>
+                                <Link href={supportTickets.create.url()}>Create your first ticket</Link>
                             </Button>
                         </CardContent>
                     </Card>
@@ -90,7 +91,7 @@ export default function Index({ tickets, flash }: Props) {
                             {tickets.map((ticket) => (
                                 <Link
                                     key={ticket.id}
-                                    href={route('support.tickets.show', ticket.id)}
+                                    href={supportTickets.show.url({ ticket })}
                                     className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted"
                                 >
                                     <div className="min-w-0 flex-1">

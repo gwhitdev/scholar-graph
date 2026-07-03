@@ -3,6 +3,7 @@ import AdminNav from '@/components/admin-nav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as adminCategories from '@/routes/admin/help-categories';
 
 interface Category {
     id: number;
@@ -20,7 +21,7 @@ export default function EditCategory({ category }: EditCategoryProps) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.put(route('admin.help-categories.update', category.id));
+        form.put(adminCategories.update.url({ help_category: category.id }));
     }
 
     return (

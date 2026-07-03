@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import * as supportTickets from '@/routes/support/tickets';
 
 interface Ticket {
     id: number;
@@ -57,7 +58,7 @@ export default function Show({ ticket, flash }: Props) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post(route('support.tickets.reply', ticket.id), {
+        post(supportTickets.reply.url({ ticket: ticket.id }), {
             onSuccess: () => reset(),
         });
     }
@@ -67,7 +68,7 @@ export default function Show({ ticket, flash }: Props) {
             <Head title={ticket.subject} />
             <div className="mx-auto max-w-4xl px-4 py-8">
                 <Link
-                    href={route('support.tickets.index')}
+                    href={supportTickets.index.url()}
                     className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeftIcon className="size-4" />

@@ -45,3 +45,23 @@ it('debits credits and records a transaction', function () {
 it('throws when debiting more than the balance', function () {
     $this->service->debit($this->user, 100, 'llm_spend');
 })->throws(InsufficientCreditsException::class);
+
+it('creates a wallet on grant when none exists', function () {
+    $user = User::factory()->create();
+    $user->wallet->delete();
+    $user->unsetRelation('wallet');
+
+    expect($user->fresh()->wallet)->toBeNull();
+
+    $this->service->grant($user, 10, 'manual_adjustment');
+
+    expect($user->fresh()->wallet->balance)->toBe(10);
+});
+
+it('creates a wallet on debit when none exists and throws insufficient credits', function () {
+    $user = User::factory()->create();
+    $user->wallet->delete();
+    $user->unsetRelation('wallet');
+
+    $this->service->debit($user, 5, 'llm_spend');
+})->throws(InsufficientCreditsException::class);

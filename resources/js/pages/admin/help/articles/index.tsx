@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import AdminNav from '@/components/admin-nav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import * as adminArticles from '@/routes/admin/help-articles';
 
 interface Article {
     id: number;
@@ -25,7 +26,7 @@ export default function ArticlesIndex({ articles }: ArticlesIndexProps) {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Help Articles</h1>
-                    <Link href={route('admin.help-articles.create')}>
+                    <Link href={adminArticles.create.url()}>
                         <Button>New Article</Button>
                     </Link>
                 </div>
@@ -54,7 +55,7 @@ export default function ArticlesIndex({ articles }: ArticlesIndexProps) {
                                     <td className="px-4 py-2">{article.sort}</td>
                                     <td className="px-4 py-2">
                                         <div className="flex gap-2">
-                                            <Link href={route('admin.help-articles.edit', article.id)}>
+                                            <Link href={adminArticles.edit.url({ help_article: article.id })}>
                                                 <Button variant="outline" size="sm">
                                                     Edit
                                                 </Button>

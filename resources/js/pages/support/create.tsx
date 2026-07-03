@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import * as supportTickets from '@/routes/support/tickets';
 
 interface Props {
     errors?: Record<string, string>;
@@ -20,7 +21,7 @@ export default function Create({ errors }: Props) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        post(route('support.tickets.store'));
+        post(supportTickets.store.url());
     }
 
     const combinedErrors = { ...errors, ...formErrors };
@@ -30,7 +31,7 @@ export default function Create({ errors }: Props) {
             <Head title="New Ticket" />
             <div className="mx-auto max-w-2xl px-4 py-8">
                 <Link
-                    href={route('support.tickets.index')}
+                    href={supportTickets.index.url()}
                     className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeftIcon className="size-4" />

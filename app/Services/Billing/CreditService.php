@@ -30,7 +30,7 @@ class CreditService
     public function grant(User $user, int $amount, string $reason, array $meta = []): void
     {
         DB::transaction(function () use ($user, $amount, $reason, $meta) {
-            $wallet = $user->wallet;
+            $wallet = $user->wallet ?: $user->wallet()->create(['balance' => 0]);
 
             $wallet->increment('balance', $amount);
 
@@ -53,7 +53,7 @@ class CreditService
     public function debit(User $user, int $amount, string $reason, array $meta = []): void
     {
         DB::transaction(function () use ($user, $amount, $reason, $meta) {
-            $wallet = $user->wallet;
+            $wallet = $user->wallet ?: $user->wallet()->create(['balance' => 0]);
 
             if ($wallet->balance < $amount) {
                 throw new InsufficientCreditsException;

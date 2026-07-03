@@ -3,13 +3,14 @@ import AdminNav from '@/components/admin-nav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as adminCategories from '@/routes/admin/help-categories';
 
 export default function CreateCategory() {
     const form = useForm({ slug: '', title: '', sort: 0 });
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.post(route('admin.help-categories.store'));
+        form.post(adminCategories.store.url());
     }
 
     return (

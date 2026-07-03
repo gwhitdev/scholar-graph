@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import AdminNav from '@/components/admin-nav';
+import * as adminTickets from '@/routes/admin/tickets';
 
 interface Ticket {
     id: number;
@@ -58,14 +59,14 @@ export default function Show({ ticket, flash }: Props) {
 
     function onReply(e: React.FormEvent) {
         e.preventDefault();
-        replyForm.post(route('admin.tickets.reply', ticket.id), {
+        replyForm.post(adminTickets.reply.url({ ticket: ticket.id }), {
             onSuccess: () => replyForm.reset(),
         });
     }
 
     function onStatusChange(value: string) {
         statusForm.setData('status', value);
-        statusForm.patch(route('admin.tickets.status', ticket.id));
+        statusForm.patch(adminTickets.status.url({ ticket: ticket.id }));
     }
 
     return (
@@ -74,7 +75,7 @@ export default function Show({ ticket, flash }: Props) {
             <AdminNav />
             <div className="mx-auto max-w-4xl px-4 py-8">
                 <Link
-                    href={route('admin.tickets.index')}
+                    href={adminTickets.index.url()}
                     className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeftIcon className="size-4" />

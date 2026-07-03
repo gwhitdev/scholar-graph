@@ -3,6 +3,7 @@ import AdminNav from '@/components/admin-nav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import * as adminArticles from '@/routes/admin/help-articles';
 
 interface Category {
     id: number;
@@ -24,7 +25,7 @@ export default function CreateArticle({ categories }: CreateArticleProps) {
 
     function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        form.post(route('admin.help-articles.store'));
+        form.post(adminArticles.store.url());
     }
 
     return (

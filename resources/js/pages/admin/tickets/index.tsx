@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import AdminNav from '@/components/admin-nav';
+import * as adminTickets from '@/routes/admin/tickets';
 
 interface Ticket {
     id: number;
@@ -115,7 +116,7 @@ export default function Index({ tickets }: Props) {
                                             <tr key={ticket.id} className="border-b last:border-0">
                                                 <td className="py-3 pr-4">
                                                     <Link
-                                                        href={route('admin.tickets.show', ticket.id)}
+                                                        href={adminTickets.show.url({ ticket: ticket.id })}
                                                         className="font-medium hover:underline"
                                                     >
                                                         {ticket.subject}
