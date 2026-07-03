@@ -28,3 +28,4 @@ yarn-error.log
 /.vscode
 /.zed
 /hackathon/*.md
+.vercel

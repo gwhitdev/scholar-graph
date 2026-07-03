@@ -16,6 +16,8 @@ Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
 require __DIR__.'/settings.php';
 require __DIR__.'/projects.php';
 require __DIR__.'/admin.php';
+require __DIR__.'/help.php';
+require __DIR__.'/support.php';
 
 // Public CMS catch-all (MUST be last to avoid shadowing app routes)
 Route::get('/{slug}', [PublicPageController::class, 'show'])

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, FolderGit2, FolderOpen, LayoutGrid, Shield } from 'lucide-react';
+import { BookOpen, FolderGit2, FolderOpen, HelpCircle, LayoutGrid, Shield, TicketIcon } from 'lucide-react';
 import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -31,6 +31,16 @@ export function AppSidebar() {
             title: 'Projects',
             href: projectsIndex(),
             icon: FolderOpen,
+        },
+        {
+            title: 'Support',
+            href: '/support/tickets',
+            icon: TicketIcon,
+        },
+        {
+            title: 'Help',
+            href: '/help',
+            icon: HelpCircle,
         },
         ...(isAdmin
             ? [

@@ -1,16 +1,18 @@
 import { Link } from '@inertiajs/react';
 import admin from '@/routes/admin';
 import licenses from '@/routes/admin/licenses';
+import tickets from '@/routes/admin/tickets';
 import usage from '@/routes/admin/usage';
 import users from '@/routes/admin/users';
 import { cn } from '@/lib/utils';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 
 const navItems = [
-    { label: 'Dashboard', href: admin.index.url() },
+    { label: 'Dashboard', href: admin.dashboard.url() },
     { label: 'Users', href: users.index.url() },
     { label: 'Usage', href: usage.index.url() },
     { label: 'Licences', href: licenses.index.url() },
+    { label: 'Tickets', href: tickets.index.url() },
 ];
 
 export default function AdminNav() {

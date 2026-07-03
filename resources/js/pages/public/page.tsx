@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import BlockRenderer from '@/components/block-renderer';
 
 interface PageData {
     title: string;
@@ -23,12 +24,7 @@ export default function PublicPage({ page }: PublicPageProps) {
             </Head>
             <main className="mx-auto max-w-4xl px-4 py-12">
                 <h1 className="mb-8 text-4xl font-bold">{page.title}</h1>
-                {page.content?.map((block, index) => (
-                    <div key={index}>
-                        {block.type === 'heading' && <h2 className="text-2xl font-semibold">{String(block.text ?? '')}</h2>}
-                        {block.type === 'paragraph' && <p className="mb-4">{String(block.text ?? '')}</p>}
-                    </div>
-                ))}
+                <BlockRenderer blocks={page.content} />
             </main>
         </>
     );

@@ -51,10 +51,7 @@ class PageService
      */
     public function publish(Page $page): void
     {
-        $page->update([
-            'status' => PageStatus::Published,
-            'published_at' => now(),
-        ]);
+        $page->publish();
     }
 
     /**
@@ -62,9 +59,6 @@ class PageService
      */
     public function unpublish(Page $page): void
     {
-        $page->update([
-            'status' => PageStatus::Draft,
-            'published_at' => null,
-        ]);
+        $page->unpublish();
     }
 }
