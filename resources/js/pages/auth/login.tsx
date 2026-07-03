@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }: Props) {
             <PasskeyVerify />
 
             <Form
-                {...store.form()}
+                {...store.post()}
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >

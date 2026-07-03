@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PaperStatus;
 use App\Jobs\EnrichPaperJob;
 use App\Models\Paper;
 use App\Models\Project;
@@ -91,7 +92,6 @@ test('user can add a paper to own project', function () {
         ->assertRedirect();
 
     $this->assertDatabaseHas('papers', [
-        'project_id' => $project->id,
         'title' => 'Test Paper',
         'openalex_id' => 'W2741809807',
         'doi' => '10.1038/test',
@@ -100,6 +100,14 @@ test('user can add a paper to own project', function () {
     ]);
 
     $paper = Paper::where('openalex_id', 'W2741809807')->first();
+
+    $this->assertDatabaseHas('project_papers', [
+        'project_id' => $project->id,
+        'paper_id' => $paper->id,
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+    ]);
+
     expect($paper->authors)->toBe(['Alice Smith', 'Bob Jones']);
 
     Queue::assertPushed(EnrichPaperJob::class);
@@ -125,6 +133,31 @@ test('adding same paper twice does not create duplicate', function () {
         ->post(route('papers.store', $project), $data);
 
     $this->assertDatabaseCount('papers', 1);
+    $this->assertDatabaseCount('project_papers', 1);
+});
+
+test('deduplication falls back to doi when openalex_id is missing', function () {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->post(route('papers.store', $project), [
+            'title' => 'DOI Paper',
+            'openalex_id' => null,
+            'doi' => '10.1038/doi-only',
+        ]);
+
+    $this->actingAs($user)
+        ->post(route('papers.store', $project), [
+            'title' => 'DOI Paper Updated',
+            'openalex_id' => null,
+            'doi' => '10.1038/doi-only',
+        ]);
+
+    $this->assertDatabaseCount('papers', 1);
+    $this->assertDatabaseCount('project_papers', 1);
 });
 
 test('user cannot add paper to another users project', function () {
@@ -142,13 +175,23 @@ test('user cannot add paper to another users project', function () {
 test('user can delete own project paper', function () {
     $user = User::factory()->create();
     $project = Project::factory()->for($user)->create();
-    $paper = Paper::factory()->for($project)->create();
+    $paper = Paper::factory()->create();
+
+    $project->papers()->attach($paper, [
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->delete(route('papers.destroy', [$project, $paper]))
         ->assertRedirect();
 
-    $this->assertDatabaseMissing('papers', ['id' => $paper->id]);
+    $this->assertDatabaseHas('papers', ['id' => $paper->id]);
+    $this->assertDatabaseMissing('project_papers', [
+        'project_id' => $project->id,
+        'paper_id' => $paper->id,
+    ]);
 });
 
 test('user can trigger enrichment on a paper', function () {
@@ -156,7 +199,13 @@ test('user can trigger enrichment on a paper', function () {
 
     $user = User::factory()->create();
     $project = Project::factory()->for($user)->create();
-    $paper = Paper::factory()->for($project)->create(['doi' => '10.1038/test']);
+    $paper = Paper::factory()->create(['doi' => '10.1038/test']);
+
+    $project->papers()->attach($paper, [
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->postJson(route('papers.enrich', [$project, $paper]))
@@ -168,7 +217,13 @@ test('user can trigger enrichment on a paper', function () {
 test('user cannot trigger enrichment on another users paper', function () {
     $user = User::factory()->create();
     $otherProject = Project::factory()->create();
-    $paper = Paper::factory()->for($otherProject)->create(['doi' => '10.1038/test']);
+    $paper = Paper::factory()->create(['doi' => '10.1038/test']);
+
+    $otherProject->papers()->attach($paper, [
+        'user_id' => $otherProject->user_id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->postJson(route('papers.enrich', [$otherProject, $paper]))
@@ -179,9 +234,75 @@ test('user cannot enrich paper from different project via own project', function
     $user = User::factory()->create();
     $ownProject = Project::factory()->for($user)->create();
     $otherProject = Project::factory()->create();
-    $otherPaper = Paper::factory()->for($otherProject)->create(['doi' => '10.1038/test']);
+    $otherPaper = Paper::factory()->create(['doi' => '10.1038/test']);
+
+    $otherProject->papers()->attach($otherPaper, [
+        'user_id' => $otherProject->user_id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
 
     $this->actingAs($user)
         ->postJson(route('papers.enrich', [$ownProject, $otherPaper]))
         ->assertNotFound();
+});
+
+test('user can update paper status on own project', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+    $paper = Paper::factory()->create();
+
+    $project->papers()->attach($paper, [
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('papers.status', [$project, $paper]), [
+            'status' => PaperStatus::Read->value,
+        ])
+        ->assertRedirect();
+
+    $this->assertDatabaseHas('project_papers', [
+        'project_id' => $project->id,
+        'paper_id' => $paper->id,
+        'status' => PaperStatus::Read->value,
+    ]);
+});
+
+test('user cannot update paper status on another users project', function () {
+    $user = User::factory()->create();
+    $otherProject = Project::factory()->create();
+    $paper = Paper::factory()->create();
+
+    $otherProject->papers()->attach($paper, [
+        'user_id' => $otherProject->user_id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('papers.status', [$otherProject, $paper]), [
+            'status' => PaperStatus::Read->value,
+        ])
+        ->assertForbidden();
+});
+
+test('status update validates status value', function () {
+    $user = User::factory()->create();
+    $project = Project::factory()->for($user)->create();
+    $paper = Paper::factory()->create();
+
+    $project->papers()->attach($paper, [
+        'user_id' => $user->id,
+        'status' => PaperStatus::Unread->value,
+        'added_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('papers.status', [$project, $paper]), [
+            'status' => 'invalid-status',
+        ])
+        ->assertSessionHasErrors('status');
 });

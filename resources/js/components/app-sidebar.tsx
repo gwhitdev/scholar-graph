@@ -1,7 +1,7 @@
-import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, FolderOpen, LayoutGrid } from 'lucide-react';
-import { index as projectsIndex } from '@/actions/App/Http/Controllers/ProjectController';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, FolderGit2, FolderOpen, HelpCircle, LayoutGrid, Shield, TicketIcon } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
+import { useProjectDrawer } from '@/components/project-drawer';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,35 +17,59 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Projects',
-        href: projectsIndex(),
-        icon: FolderOpen,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: FolderGit2,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const isAdmin = auth.is_admin === true;
+    const { toggle: toggleProjectDrawer, close: closeProjectDrawer } = useProjectDrawer();
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Projects',
+            href: '#',
+            icon: FolderOpen,
+            onClick: toggleProjectDrawer,
+        },
+        {
+            title: 'Support',
+            href: '/support/tickets',
+            icon: TicketIcon,
+        },
+        {
+            title: 'Help',
+            href: '/help',
+            icon: HelpCircle,
+        },
+        ...(isAdmin
+            ? [
+                  {
+                      title: 'Admin',
+                      href: '/admin',
+                      icon: Shield,
+                  } as NavItem,
+              ]
+            : []),
+    ];
+
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'Repository',
+            href: 'https://github.com/laravel/react-starter-kit',
+            icon: FolderGit2,
+        },
+        {
+            title: 'Documentation',
+            href: 'https://laravel.com/docs/starter-kits#react',
+            icon: BookOpen,
+        },
+    ];
+
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-sidebar-border bg-sidebar">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -59,7 +83,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={mainNavItems} closeDrawer={closeProjectDrawer} />
             </SidebarContent>
 
             <SidebarFooter>
